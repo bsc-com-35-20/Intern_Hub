@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 
 
         '/LogIn': (context) => Log_In(), // Define LogIn route
-        '/Register': (context) => Register(), // Define Register route
+        '/Register': (context) => Register(), // Define Register rou5te
         '/Home': (context) => HomePage(),
 
         '/VacancyDetails1': (context) => VacancyDetails1(),
