@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:ui'; // For Frosted Glass effect
 
 class Register extends StatefulWidget {
   @override
@@ -16,8 +17,8 @@ class _RegisterState extends State<Register> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String? _selectedGender;
-  bool _obscurePassword = true; // To toggle password visibility
-  bool _obscureConfirmPassword = true; // To toggle confirm password visibility
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   Future<void> _saveUserDetails(User user) async {
     await FirebaseFirestore.instance.collection('Intern_Personal_Details').doc(user.email).set({
@@ -42,25 +43,17 @@ class _RegisterState extends State<Register> {
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Create user with email and password
         UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        // Save user details to Firestore
         await _saveUserDetails(userCredential.user!);
-
-        // Show success message
         _showSuccessToast();
-
-        // Navigate to the next screen (e.g., Home screen)
         Navigator.pushReplacementNamed(context, '/Home');
       } on FirebaseAuthException catch (e) {
-        // Show error message
-        String message = e.message ?? "Registration failed";
         Fluttertoast.showToast(
-          msg: message,
+          msg: e.message ?? "Registration failed",
           toastLength: Toast.LENGTH_SHORT,
           textColor: Colors.red,
           fontSize: 16.0,
@@ -75,187 +68,98 @@ class _RegisterState extends State<Register> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlue], // Gradient background
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Color(0xFF8E9EAB), Color(0xFFeef2f3)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Card(
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+          child: SingleChildScrollView(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: 380,
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withOpacity(0.4)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Register',
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                         SizedBox(height: 20),
-                        // Name Field
-                        TextFormField(
+                        _buildTextField(
                           controller: _nameController,
-                          decoration: InputDecoration(
-                            labelText: 'Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Full Name';
-                            }
-                            return null;
-                          },
+                          hintText: 'Full Name',
+                          icon: Icons.person,
                         ),
                         SizedBox(height: 20),
-                        // Age Field
-                        TextFormField(
+                        _buildTextField(
                           controller: _ageController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Age',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Age';
-                            }
-                            int? age = int.tryParse(value);
-                            if (age == null || age < 18 || age > 50) {
-                              return 'Please enter a valid age (18-50)';
-                            }
-                            return null;
-                          },
+                          hintText: 'Age',
+                          icon: Icons.cake,
+                          inputType: TextInputType.number,
                         ),
                         SizedBox(height: 20),
-                        // Gender Field
                         DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: 'Gender',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                          ),
+                          decoration: _inputDecoration('Gender'),
                           value: _selectedGender,
-                          items: ['Male', 'Female', 'Other']
-                              .map((gender) => DropdownMenuItem(
-                            value: gender,
-                            child: Text(gender),
-                          ))
-                              .toList(),
+                          items: ['Male', 'Female', 'Other'].map((gender) {
+                            return DropdownMenuItem(value: gender, child: Text(gender));
+                          }).toList(),
                           onChanged: (value) {
-                            setState(() {
-                              _selectedGender = value;
-                            });
+                            setState(() => _selectedGender = value);
                           },
                           validator: (value) {
-                            if (value == null) {
-                              return 'Please select your Gender';
-                            }
+                            if (value == null) return 'Please select your Gender';
                             return null;
                           },
                         ),
                         SizedBox(height: 20),
-                        // Email Field
-                        TextFormField(
+                        _buildTextField(
                           controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Email';
-                            }
-                            if (!RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                                .hasMatch(value)) {
-                              return 'Please enter a valid Email';
-                            }
-                            return null;
-                          },
+                          hintText: 'Email',
+                          icon: Icons.email_outlined,
+                          inputType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 20),
-                        // Password Field
-                        TextFormField(
+                        _buildPasswordField(
                           controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                color: Colors.blue,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword; // Toggle password visibility
-                                });
-                              },
-                            ),
-                          ),
+                          hintText: 'Password',
                           obscureText: _obscurePassword,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Password';
-                            }
-                            return null;
+                          toggleVisibility: () {
+                            setState(() => _obscurePassword = !_obscurePassword);
                           },
                         ),
                         SizedBox(height: 20),
-                        // Confirm Password Field
-                        TextFormField(
+                        _buildPasswordField(
                           controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200], // Light background
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                                color: Colors.blue,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureConfirmPassword = !_obscureConfirmPassword; // Toggle confirm password visibility
-                                });
-                              },
-                            ),
-                          ),
+                          hintText: 'Confirm Password',
                           obscureText: _obscureConfirmPassword,
+                          toggleVisibility: () {
+                            setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                          },
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please confirm your Password';
-                            }
                             if (value != _passwordController.text) {
                               return 'Passwords do not match';
                             }
@@ -263,28 +167,27 @@ class _RegisterState extends State<Register> {
                           },
                         ),
                         SizedBox(height: 30),
-                        // Sign Up Button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _register,
-                            child: Text('Register'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(16),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10), // Rounded button
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              backgroundColor: Colors.blueAccent, // Button color
+                              backgroundColor: Colors.blueAccent,
                             ),
+                            child: Text('Register', style: TextStyle(fontSize: 18)),
                           ),
                         ),
                         SizedBox(height: 20),
-                        // Switch to Log In
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacementNamed(context, '/LogIn');
-                          },
-                          child: Text('Already have an Account? Log In', style: TextStyle(color: Colors.blue)),
+                          onTap: () => Navigator.pushReplacementNamed(context, '/LogIn'),
+                          child: Text(
+                            'Already have an Account? Log In',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -295,6 +198,66 @@ class _RegisterState extends State<Register> {
           ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hintText) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(color: Colors.white70),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.3),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    TextInputType inputType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: inputType,
+      style: TextStyle(color: Colors.white),
+      decoration: _inputDecoration(hintText).copyWith(prefixIcon: Icon(icon, color: Colors.white)),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $hintText';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String hintText,
+    required bool obscureText,
+    required VoidCallback toggleVisibility,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(color: Colors.white),
+      decoration: _inputDecoration(hintText).copyWith(
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility : Icons.visibility_off,
+            color: Colors.white,
+          ),
+          onPressed: toggleVisibility,
+        ),
+      ),
+      validator: validator ?? (value) {
+        if (value == null || value.isEmpty) return 'Please enter your $hintText';
+        return null;
+      },
     );
   }
 }
