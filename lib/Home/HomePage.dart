@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:internhub/Settings/UserDetails.dart';
+import 'package:internhub/Home/UserDetails.dart';
 import 'package:internhub/Home/Applications.dart';
 import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/Home/Help.dart';
-import 'package:internhub/Home/InternshipDashboard.dart'; 
+import 'package:internhub/Home/InternshipDashboard.dart';
 import 'package:internhub/Home/ApplicationResources.dart';
 import 'package:internhub/Home/Search.dart';
 import 'package:internhub/Settings/SettingsPage.dart';
-
 import '../LogIn_ And_Register/Log_In.dart';
-import 'InternshipTips.dart'; 
-import 'NetworkingOpportunities.dart'; 
-import 'InterviewPreparation.dart'; 
+import 'InternshipTips.dart';
+import 'NetworkingOpportunities.dart';
+import 'InterviewPreparation.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -79,7 +78,7 @@ class _HomePageState extends State<HomePage> {
           end: Alignment.bottomRight,
         ),
         image: DecorationImage(
-          image: AssetImage('assets/header_background.png'), // Add your background image here
+          image: AssetImage('assets/header_background.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -107,30 +106,33 @@ class _HomePageState extends State<HomePage> {
         mainAxisSpacing: 16,
         childAspectRatio: 1,
         children: [
-          _buildCard(Icons.person, 'Your Profile', Colors.blue),
-          _buildCard(Icons.work_outline, 'My Applications', Colors.orange),
-          _buildCard(Icons.business_center, 'Vacancies', Colors.red),
-          _buildCard(Icons.lightbulb_outline, 'Internship Tips', Colors.amber),
-          _buildCard(Icons.group, 'Networking', Colors.green),
-          _buildCard(Icons.access_alarm, 'Interview Prep', Colors.purple),
+          _buildCard(Icons.person, 'Your Profile', Colors.blue, UserDetails()),
+          _buildCard(
+              Icons.work_outline, 'My Applications', Colors.orange, Applications()),
+          _buildCard(
+              Icons.business_center, 'Vacancies', Colors.red, Vacancies()),
+          _buildCard(Icons.lightbulb_outline, 'Internship Tips', Colors.amber,
+              InternshipTips()),
+          _buildCard(Icons.group, 'Networking', Colors.green,
+              NetworkingOpportunities()),
+          _buildCard(Icons.access_alarm, 'Interview Prep', Colors.purple,
+              InterviewPreparation()),
         ],
       ),
     );
   }
 
-  Widget _buildCard(IconData icon, String title, Color color) {
+  Widget _buildCard(IconData icon, String title, Color color, Widget page) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
       child: InkWell(
         onTap: () {
           Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NetworkingOpportunities(),
-                        ),
-                      );
-                    },
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
+        },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -152,7 +154,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/footer_image.png'), // Add your footer image here
+          image: AssetImage('assets/footer_image.png'),
           fit: BoxFit.cover,
         ),
       ),
