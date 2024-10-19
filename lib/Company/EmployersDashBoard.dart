@@ -12,7 +12,7 @@ class InternHubApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      initialRoute: '/',
+      initialRoute: '/HomePage',
       routes: {
         '/': (context) => EmployersDashBoard(),
         '/PostInternship': (context) => PostInternshipPage(),

@@ -6,6 +6,7 @@ import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/Home/Help.dart';
 import 'package:internhub/Home/InternshipDashboard.dart';
 import 'package:internhub/Home/ApplicationResources.dart';
+import 'package:internhub/Company/EmployersDashBoard.dart';
 import 'package:internhub/Home/Search.dart';
 import 'package:internhub/Settings/SettingsPage.dart';
 import '../LogIn_ And_Register/Log_In.dart';
@@ -117,6 +118,7 @@ class _HomePageState extends State<HomePage> {
               NetworkingOpportunities()),
           _buildCard(Icons.access_alarm, 'Interview Prep', Colors.purple,
               InterviewPreparation()),
+              _buildCard(Icons.business, 'Employer', Colors.yellow, EmployersDashBoard())
         ],
       ),
     );
