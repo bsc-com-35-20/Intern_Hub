@@ -28,13 +28,13 @@ dependencies:
   firebase_database: ^11.1.2
   flutter_local_notifications: ^17.2.2
   url_launcher: ^6.0.20
-
-  # Dependencies for forms, navigation, and UI components
-  flutter_localizations: # For localization if needed
-    sdk: flutter
   searchfield: ^1.1.6
   connectivity_plus: ^6.0.5
   http: ^1.2.2
+
+  # New dependencies for profile functionality
+  image_picker: ^0.8.7+3
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
