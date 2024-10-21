@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'dart:ui'; // For Frosted Glass effect
 
 class Register extends StatefulWidget {
   @override
@@ -16,19 +15,51 @@ class _RegisterState extends State<Register> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _companyNameController = TextEditingController();
+  final _companyAddressController = TextEditingController();
   String? _selectedGender;
+  bool _isCompany = false; // Toggle between Intern and Company/Employee
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  Future<void> _saveUserDetails(User user) async {
-    await FirebaseFirestore.instance.collection('Intern_Personal_Details').doc(user.email).set({
-      'name': _nameController.text.trim(),
-      'email': user.email,
-      'age': _ageController.text.trim(),
-      'gender': _selectedGender ?? 'Unknown',
-      'createdAt': Timestamp.now(),
-      'profilePictureUrl': '',
-    });
+  Future<void> _saveCompanyDetails(User user) async {
+    try {
+      // Save company details in Firestore
+      await FirebaseFirestore.instance.collection('Company_Details').doc(user.email).set({
+        'companyName': _companyNameController.text.trim(),
+        'email': user.email,
+        'companyAddress': _companyAddressController.text.trim(),
+        'createdAt': Timestamp.now(),
+      });
+
+      // Optionally, you can add a success message or perform further actions
+      print('Company details saved successfully.');
+    } catch (e) {
+      // Handle any errors
+      print('Error saving company details: $e');
+    }
+  }
+
+  Future<void> _saveInternDetails(User user) async {
+    try {
+      // Save intern details in Firestore
+      await FirebaseFirestore.instance
+          .collection('Intern_Personal_Details') // Correct collection name
+          .doc(user.email) // Using the user's email as the document ID
+          .set({
+        'name': _nameController.text.trim(),
+        'email': user.email,
+        'age': _ageController.text.trim(),
+        'gender': _selectedGender,
+        'createdAt': Timestamp.now(),
+      });
+
+      // Optionally, you can add a success message or perform further actions
+      print('Intern details saved successfully.');
+    } catch (e) {
+      // Handle any errors
+      print('Error saving intern details: $e');
+    }
   }
 
   void _showSuccessToast([String message = "Registered Successfully"]) {
@@ -40,20 +71,27 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Future<void> _register() async {
+  Future<void> _registerCompany() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
+        // Create user with email and password
         UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        await _saveUserDetails(userCredential.user!);
+        // Save company details to Firestore without logging in the user
+        await _saveCompanyDetails(userCredential.user!);
+
+        // Show success message
         _showSuccessToast();
-        Navigator.pushReplacementNamed(context, '/Home');
+
+        // Do not log in the user automatically, let them manually log in later
       } on FirebaseAuthException catch (e) {
+        // Show error message
+        String message = e.message ?? "Registration failed";
         Fluttertoast.showToast(
-          msg: e.message ?? "Registration failed",
+          msg: message,
           toastLength: Toast.LENGTH_SHORT,
           textColor: Colors.red,
           fontSize: 16.0,
@@ -62,115 +100,101 @@ class _RegisterState extends State<Register> {
     }
   }
 
+  Future<void> _registerIntern() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        // Create user with email and password
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        // Save intern details to Firestore
+        await _saveInternDetails(userCredential.user!);
+
+        // Show success message for intern registration
+        _showSuccessToast();
+
+        // Do not log in the user automatically, let them manually log in later
+      } on FirebaseAuthException catch (e) {
+        // Show error message
+        String message = e.message ?? "Registration failed";
+        Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          textColor: Colors.red,
+          fontSize: 16.0,
+        );
+      }
+    }
+  }
+
+  // Email validation function
+  bool _isEmailValid(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    return emailRegex.hasMatch(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF8E9EAB), Color(0xFFeef2f3)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Colors.blueAccent, Colors.lightBlue],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: Center(
-          child: SingleChildScrollView(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: 380,
-                  padding: EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.4)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Form(
-                    key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Register',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
                         ),
                         SizedBox(height: 20),
-                        _buildTextField(
-                          controller: _nameController,
-                          hintText: 'Full Name',
-                          icon: Icons.person,
-                        ),
-                        SizedBox(height: 20),
-                        _buildTextField(
-                          controller: _ageController,
-                          hintText: 'Age',
-                          icon: Icons.cake,
-                          inputType: TextInputType.number,
-                        ),
-                        SizedBox(height: 20),
-                        DropdownButtonFormField<String>(
-                          decoration: _inputDecoration('Gender'),
-                          value: _selectedGender,
-                          items: ['Male', 'Female', 'Other'].map((gender) {
-                            return DropdownMenuItem(value: gender, child: Text(gender));
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() => _selectedGender = value);
+
+                        // Toggle for Intern or Company Registration
+                        ToggleButtons(
+                          isSelected: [_isCompany, !_isCompany],
+                          children: [Text('Company'), Text('Intern')],
+                          onPressed: (int index) {
+                            setState(() {
+                              _isCompany = index == 0;
+                            });
                           },
-                          validator: (value) {
-                            if (value == null) return 'Please select your Gender';
-                            return null;
-                          },
+                          color: Colors.blueAccent,
+                          selectedColor: Colors.white,
+                          fillColor: Colors.blueAccent,
+                          selectedBorderColor: Colors.blueAccent,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         SizedBox(height: 20),
-                        _buildTextField(
-                          controller: _emailController,
-                          hintText: 'Email',
-                          icon: Icons.email_outlined,
-                          inputType: TextInputType.emailAddress,
-                        ),
-                        SizedBox(height: 20),
-                        _buildPasswordField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                          obscureText: _obscurePassword,
-                          toggleVisibility: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        _buildPasswordField(
-                          controller: _confirmPasswordController,
-                          hintText: 'Confirm Password',
-                          obscureText: _obscureConfirmPassword,
-                          toggleVisibility: () {
-                            setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
-                          },
-                          validator: (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
+
+                        // Display fields based on selected option
+                        _isCompany ? _buildCompanyForm() : _buildInternForm(),
+
                         SizedBox(height: 30),
+                        // Register Button for Company and Intern
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _register,
+                            onPressed: _isCompany ? _registerCompany : _registerIntern,
+                            child: Text('Register'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(16),
                               shape: RoundedRectangleBorder(
@@ -178,16 +202,15 @@ class _RegisterState extends State<Register> {
                               ),
                               backgroundColor: Colors.blueAccent,
                             ),
-                            child: Text('Register', style: TextStyle(fontSize: 18)),
                           ),
                         ),
                         SizedBox(height: 20),
+                        // Switch to Log In
                         GestureDetector(
-                          onTap: () => Navigator.pushReplacementNamed(context, '/LogIn'),
-                          child: Text(
-                            'Already have an Account? Log In',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          onTap: () {
+                            Navigator.pushReplacementNamed(context, '/LogIn');
+                          },
+                          child: Text('Already have an Account? Log In', style: TextStyle(color: Colors.blue)),
                         ),
                       ],
                     ),
@@ -201,63 +224,304 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  InputDecoration _inputDecoration(String hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white70),
-      filled: true,
-      fillColor: Colors.white.withOpacity(0.3),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide.none,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    TextInputType inputType = TextInputType.text,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: inputType,
-      style: TextStyle(color: Colors.white),
-      decoration: _inputDecoration(hintText).copyWith(prefixIcon: Icon(icon, color: Colors.white)),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your $hintText';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String hintText,
-    required bool obscureText,
-    required VoidCallback toggleVisibility,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      style: TextStyle(color: Colors.white),
-      decoration: _inputDecoration(hintText).copyWith(
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility : Icons.visibility_off,
-            color: Colors.white,
+  // Build form for intern registration
+  Widget _buildInternForm() {
+    return Column(
+      children: [
+        // Name Field
+        TextFormField(
+          controller: _nameController,
+          decoration: InputDecoration(
+            labelText: 'Name',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
           ),
-          onPressed: toggleVisibility,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Full Name';
+            }
+            return null;
+          },
         ),
-      ),
-      validator: validator ?? (value) {
-        if (value == null || value.isEmpty) return 'Please enter your $hintText';
-        return null;
-      },
+        SizedBox(height: 20),
+        // Age Field
+        TextFormField(
+          controller: _ageController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Age',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Age';
+            }
+            int? age = int.tryParse(value);
+            if (age == null || age < 18 || age > 50) {
+              return 'Please enter a valid age (18-50)';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Gender Field
+        DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            labelText: 'Gender',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          value: _selectedGender,
+          items: ['Male', 'Female', 'Other'].map((gender) {
+            return DropdownMenuItem(
+              value: gender,
+              child: Text(gender),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedGender = value;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return 'Please select your Gender';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Email Field
+        TextFormField(
+          controller: _emailController,
+          decoration: InputDecoration(
+            labelText: 'Email',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Email';
+            }
+            if (!_isEmailValid(value)) {
+              return 'Please enter a valid Email';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Password Field
+        TextFormField(
+          controller: _passwordController,
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            labelText: 'Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Password';
+            }
+            if (value.length < 6) {
+              return 'Password must be at least 6 characters';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Confirm Password Field
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: _obscureConfirmPassword,
+          decoration: InputDecoration(
+            labelText: 'Confirm Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please confirm your Password';
+            }
+            if (value != _passwordController.text) {
+              return 'Passwords do not match';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  // Build form for company registration
+  Widget _buildCompanyForm() {
+    return Column(
+      children: [
+        // Company Name Field
+        TextFormField(
+          controller: _companyNameController,
+          decoration: InputDecoration(
+            labelText: 'Company Name',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Company Name';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Company Address Field
+        TextFormField(
+          controller: _companyAddressController,
+          decoration: InputDecoration(
+            labelText: 'Company Address',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Company Address';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Email Field
+        TextFormField(
+          controller: _emailController,
+          decoration: InputDecoration(
+            labelText: 'Email',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Email';
+            }
+            if (!_isEmailValid(value)) {
+              return 'Please enter a valid Email';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Password Field
+        TextFormField(
+          controller: _passwordController,
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            labelText: 'Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Password';
+            }
+            if (value.length < 6) {
+              return 'Password must be at least 6 characters';
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 20),
+        // Confirm Password Field
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: _obscureConfirmPassword,
+          decoration: InputDecoration(
+            labelText: 'Confirm Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please confirm your Password';
+            }
+            if (value != _passwordController.text) {
+              return 'Passwords do not match';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 }

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:internhub/Vacancy/VacancyDetails1.dart';
-import 'package:internhub/Vacancy/VacancyDetails2.dart';
-import 'package:internhub/Vacancy/VacancyDetails3.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(InternHubApp());
@@ -17,44 +14,73 @@ class InternHubApp extends StatelessWidget {
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => Vacancies(),
-        '/VacancyDetails1': (context) => VacancyDetails1(),
-        '/VacancyDetails2': (context) => VacancyDetails2(),
-        '/VacancyDetails3': (context) => VacancyDetails3(),
-      },
+
     );
   }
 }
 
-class Vacancies extends StatelessWidget {
-  // Sample list of vacancies with deadlines
-  final List<Map<String, dynamic>> vacancies = [
-    {
-      "title": "Research Assistants (15) – WASH Projects Sustainability Research",
-      "route": '/VacancyDetails1',
-      "deadline": DateTime(2024, 10, 15), // Example deadline
-    },
-    {
-      "title": "IT Intern – Software Development at TechConnect",
-      "route": '/VacancyDetails2',
-      "deadline": DateTime(2024, 10, 5), // Example deadline (past)
-    },
-    {
-      "title": "Marketing Intern – Brand Awareness Campaigns",
-      "route": '/VacancyDetails3',
-      "deadline": DateTime(2024, 10, 20), // Example deadline
-    },
-  ];
+class Vacancies extends StatefulWidget {
+  @override
+  _VacanciesState createState() => _VacanciesState();
+}
+
+class _VacanciesState extends State<Vacancies> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> internships = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInternships();
+  }
+
+  Future<void> _fetchInternships() async {
+    try {
+      List<String> categories = ['Marketing', 'Design'];
+      List<Map<String, dynamic>> fetchedInternships = [];
+
+      for (String category in categories) {
+        QuerySnapshot querySnapshot = await _firestore
+            .collection('Internship_Posted')
+            .doc(category)
+            .collection('Opportunities')
+            .get();
+
+        querySnapshot.docs.asMap().forEach((index, doc) {
+          DateTime postingDate = (doc['timestamp'] as Timestamp).toDate();
+          DateTime deadline =
+          postingDate.add(Duration(days: 14)); // 2 weeks deadline
+
+          fetchedInternships.add({
+            'id': doc.id, // Add doc ID to identify the document
+            'title': doc['title'] ?? 'No Title',
+            'description': doc['description'] ?? 'No Description',
+            'category': category,
+            'duration': doc['duration'] ?? 'No Duration',
+            'location': doc['location'] ?? 'No Location',
+            'requirements': doc['requirements'] ?? 'No Requirements',
+            'stipend': doc['stipend'] ?? 'No Stipend',
+            'postingDate': postingDate,
+            'deadline': deadline,
+          });
+        });
+      }
+
+      fetchedInternships.sort((a, b) => a['title'].compareTo(b['title']));
+
+      setState(() {
+        internships = fetchedInternships;
+      });
+    } catch (e) {
+      print('Error fetching internships: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Get today's date
     DateTime today = DateTime.now();
 
-    // Filter vacancies to only include those that haven't expired
-    final List<Map<String, dynamic>> activeVacancies = vacancies.where((vacancy) {
+    final List<Map<String, dynamic>> activeVacancies = internships.where((vacancy) {
       return vacancy["deadline"].isAfter(today);
     }).toList();
 
@@ -101,7 +127,7 @@ class Vacancies extends StatelessWidget {
                         vertical: 20,
                       ),
                       title: Text(
-                        activeVacancies[index]["title"]!,
+                        activeVacancies[index]["title"],
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -125,7 +151,15 @@ class Vacancies extends StatelessWidget {
                         color: Colors.redAccent,
                       ),
                       onTap: () {
-                        Navigator.pushNamed(context, activeVacancies[index]["route"]!);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VacancyDetails(
+                              vacancyId: activeVacancies[index]['id'],
+                              category: activeVacancies[index]['category'],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   );
@@ -133,9 +167,96 @@ class Vacancies extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            // Optional: Add a footer or button here for more actions
           ],
         ),
+      ),
+    );
+  }
+}
+
+class VacancyDetails extends StatelessWidget {
+  final String vacancyId;
+  final String category;
+
+  VacancyDetails({required this.vacancyId, required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Vacancy Details'),
+        backgroundColor: Colors.redAccent,
+      ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance
+            .collection('Internship_Posted')
+            .doc(category)
+            .collection('Opportunities')
+            .doc(vacancyId)
+            .get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text('Vacancy not found.'));
+          }
+
+          var data = snapshot.data!.data() as Map<String, dynamic>;
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data['title'] ?? 'No Title',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Location: ${data['location'] ?? 'No Location'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Duration: ${data['duration'] ?? 'No Duration'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Stipend: \$${data['stipend'] ?? 'No Stipend'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Requirements: ${data['requirements'] ?? 'No Requirements'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Posted on: ${data['postingDate'] != null ? (data['postingDate'] as Timestamp).toDate().toString() : 'No Date'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Description',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  data['description'] ?? 'No Description',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

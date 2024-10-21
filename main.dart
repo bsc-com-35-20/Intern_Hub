@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import 'package:internhub/LogIn_ And_Register/Log_In.dart';
 import 'package:internhub/LogIn_ And_Register/Register.dart';
-import 'firebase_options.dart';
+import 'package:internhub/firebase_options.dart';
 import 'package:internhub/Home/HomePage.dart';
 import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/Vacancy/VacancyDetails1.dart';
@@ -39,11 +39,7 @@ class MyApp extends StatelessWidget {
 
         '/LogIn': (context) => Log_In(), // Define LogIn route
         '/Register': (context) => Register(), // Define Register route
-        '/Home': (context) =>const Homepage(),
-
-        '/VacancyDetails1': (context) => VacancyDetails1(),
-        '/VacancyDetails2': (context) => VacancyDetails2(),
-        '/VacancyDetails3': (context) => VacancyDetails3(),
+        '/Home': (context) =>HomePage(userRole: '',),
 
 
       },

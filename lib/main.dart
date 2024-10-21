@@ -8,9 +8,6 @@ import 'package:internhub/Settings/UpdateProfile.dart';
 import 'firebase_options.dart';
 import 'package:internhub/Home/HomePage.dart';
 import 'package:internhub/Home/Vacancies.dart';
-import 'package:internhub/Vacancy/VacancyDetails1.dart';
-import 'package:internhub/Vacancy/VacancyDetails2.dart';
-import 'package:internhub/Vacancy/VacancyDetails3.dart';
 
 
 
@@ -18,7 +15,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Make sure this is set up
+    options: DefaultFirebaseOptions.currentPlatform, 
   );
   runApp(MyApp());
 }
@@ -39,13 +36,10 @@ class MyApp extends StatelessWidget {
 
         '/LogIn': (context) => Log_In(), // Define LogIn route
         '/Register': (context) => Register(), // Define Register route
-        '/Home': (context) => HomePage(),
+        '/Home': (context) => HomePage(userRole: ModalRoute.of(context)!.settings.arguments as String), // Pass userRole
         '/UpdateProfile':(context) => UpdateProfile(),
-
-        '/VacancyDetails1': (context) => VacancyDetails1(),
-        '/VacancyDetails2': (context) => VacancyDetails2(),
-        '/VacancyDetails3': (context) => VacancyDetails3(),
-
+        '/Vacancies':(context) => Vacancies(),
+        
 
       },
       // or use onGenerateRoute if you want more dynamic route handling
