@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
 import 'package:internhub/LogIn_ And_Register/Log_In.dart';
 import 'package:internhub/LogIn_ And_Register/Register.dart';
+import 'package:internhub/SplashScreen.dart';
 import 'package:internhub/firebase_options.dart';
 import 'package:internhub/Home/HomePage.dart';
 import 'package:internhub/Home/Vacancies.dart';
@@ -32,11 +33,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/LogIn', // Set initial route
+      initialRoute: '/Splash', // Set initial route
 
       routes: {
 
-
+        '/Splash':(context) => SplashScreen(),
         '/LogIn': (context) => Log_In(), // Define LogIn route
         '/Register': (context) => Register(), // Define Register route
         '/Home': (context) =>HomePage(userRole: '',),

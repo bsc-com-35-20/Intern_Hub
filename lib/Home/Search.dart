@@ -5,7 +5,8 @@ void main() {
   runApp(MaterialApp(
     home: Search(),
     theme: ThemeData(
-      primarySwatch: Colors.indigo,
+      primarySwatch: Colors.blue,
+      scaffoldBackgroundColor: Color(0xFFEAF2FD),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     ),
   ));
@@ -20,7 +21,7 @@ class _SearchState extends State<Search> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> internships = [];
   List<Map<String, dynamic>> searchResults = [];
-  bool isLoading = false; // Track loading state
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _SearchState extends State<Search> {
     });
 
     try {
-      List<String> categories = ['Marketing', 'Design']; // Adjust categories as needed
+      List<String> categories = ['Marketing', 'Design'];
       List<Map<String, dynamic>> fetchedInternships = [];
 
       for (String category in categories) {
@@ -55,14 +56,14 @@ class _SearchState extends State<Search> {
             'requirements': doc['requirements'] ?? 'No Requirements',
             'stipend': doc['stipend'] ?? 'No Stipend',
             'postingDate': (doc['timestamp'] as Timestamp).toDate(),
-            'deadline': (doc['timestamp'] as Timestamp).toDate().add(Duration(days: 14)), // Set deadline
+            'deadline': (doc['timestamp'] as Timestamp).toDate().add(Duration(days: 14)),
           });
         });
       }
 
       setState(() {
         internships = fetchedInternships;
-        searchResults = internships; // Initialize search results with all internships
+        searchResults = internships;
       });
     } catch (e) {
       _showSnackBar('Error fetching internships: $e');
@@ -91,7 +92,15 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Internship Search'),
+        title: Text('Find a Job', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.filter_list, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -102,12 +111,35 @@ class _SearchState extends State<Search> {
                   child: searchResults.isEmpty
                       ? Center(child: Text('No results found.'))
                       : ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: searchResults.length,
                           itemBuilder: (context, index) {
                             return Card(
-                              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              margin: EdgeInsets.symmetric(vertical: 8),
+                              color: index == 0 ? Colors.teal : Colors.white,
                               child: ListTile(
-                                title: Text(searchResults[index]['title']),
+                                title: Text(
+                                  searchResults[index]['title'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: index == 0 ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "${searchResults[index]['category']} - ${searchResults[index]['stipend']}",
+                                  style: TextStyle(
+                                    color: index == 0 ? Colors.white70 : Colors.grey[700],
+                                  ),
+                                ),
+                                trailing: Text(
+                                  '${index == 0 ? "Promoted": "Recommended"}',
+                                  style: TextStyle(
+                                    color: index == 0 ? Colors.white : Colors.black,
+                                  ),
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -142,9 +174,12 @@ class SearchBar extends StatelessWidget {
       child: TextField(
         onChanged: onQueryChanged,
         decoration: InputDecoration(
-          labelText: 'Search Internships',
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'Enter job title or keyword',
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
           ),
           prefixIcon: Icon(Icons.search),
         ),
