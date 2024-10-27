@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:internhub/Home/Vacancies.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -21,28 +17,55 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  List<String> localData = ['Apple', 'Banana', 'Cherry', 'Date'];
-  List<String> onlineData = [];
-  List<String> searchResults = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> internships = [];
+  List<Map<String, dynamic>> searchResults = [];
   bool isLoading = false; // Track loading state
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _fetchInternships();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _fetchInternships() async {
     setState(() {
       isLoading = true;
     });
 
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult != ConnectivityResult.none) {
-      await _fetchOnlineData();
-    } else {
-      _showSnackBar('No internet connection. Loading local data.');
-      await _loadLocalData();
+    try {
+      List<String> categories = ['Marketing', 'Design']; // Adjust categories as needed
+      List<Map<String, dynamic>> fetchedInternships = [];
+
+      for (String category in categories) {
+        QuerySnapshot querySnapshot = await _firestore
+            .collection('Internship_Posted')
+            .doc(category)
+            .collection('Opportunities')
+            .get();
+
+        querySnapshot.docs.forEach((doc) {
+          fetchedInternships.add({
+            'id': doc.id,
+            'title': doc['title'] ?? 'No Title',
+            'description': doc['description'] ?? 'No Description',
+            'category': category,
+            'duration': doc['duration'] ?? 'No Duration',
+            'location': doc['location'] ?? 'No Location',
+            'requirements': doc['requirements'] ?? 'No Requirements',
+            'stipend': doc['stipend'] ?? 'No Stipend',
+            'postingDate': (doc['timestamp'] as Timestamp).toDate(),
+            'deadline': (doc['timestamp'] as Timestamp).toDate().add(Duration(days: 14)), // Set deadline
+          });
+        });
+      }
+
+      setState(() {
+        internships = fetchedInternships;
+        searchResults = internships; // Initialize search results with all internships
+      });
+    } catch (e) {
+      _showSnackBar('Error fetching internships: $e');
     }
 
     setState(() {
@@ -50,46 +73,11 @@ class _SearchState extends State<Search> {
     });
   }
 
-  Future<void> _fetchOnlineData() async {
-    try {
-      final List<String> urls = [
-        'https://www.rootsinterns.com/destinations/internships-malawi/',
-        'https://ntchito.com/apply-for-internships-in-malawi/',
-      ];
-
-      for (String url in urls) {
-        final response = await http.get(Uri.parse(url));
-
-        if (response.statusCode == 200) {
-          List internships = jsonDecode(response.body);
-          onlineData.addAll(
-              internships.map((e) => e['title'] as String).toList());
-        }
-      }
-      await _saveLocalData(onlineData);
-    } catch (e) {
-      _showSnackBar('Failed to fetch online data. Loading local data.');
-      await _loadLocalData();
-    }
-  }
-
-  Future<void> _saveLocalData(List<String> data) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('internships', data);
-  }
-
-  Future<void> _loadLocalData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    localData = prefs.getStringList('internships') ?? localData;
-  }
-
   void onQueryChanged(String query) {
     setState(() {
-      searchResults = [
-        ...localData,
-        ...onlineData,
-      ].where((item) =>
-          item.toLowerCase().contains(query.toLowerCase())).toList();
+      searchResults = internships
+          .where((item) => item['title'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
   }
 
@@ -104,38 +92,32 @@ class _SearchState extends State<Search> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Internship Search'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _loadData,
-          ),
-        ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Loading indicator
+          ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 SearchBar(onQueryChanged: onQueryChanged),
                 Expanded(
                   child: searchResults.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No results found.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
-                        )
+                      ? Center(child: Text('No results found.'))
                       : ListView.builder(
                           itemCount: searchResults.length,
                           itemBuilder: (context, index) {
                             return Card(
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 16),
+                              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                               child: ListTile(
-                                leading: Icon(Icons.work_outline),
-                                title: Text(searchResults[index]),
+                                title: Text(searchResults[index]['title']),
                                 onTap: () {
-                                  _showSnackBar(
-                                      'Selected: ${searchResults[index]}');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VacancyDetails(
+                                        vacancyId: searchResults[index]['id'],
+                                        category: searchResults[index]['category'],
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
                             );
@@ -155,8 +137,8 @@ class SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
+    return Padding(
+      padding: EdgeInsets.all(16.0),
       child: TextField(
         onChanged: onQueryChanged,
         decoration: InputDecoration(
@@ -166,6 +148,63 @@ class SearchBar extends StatelessWidget {
           ),
           prefixIcon: Icon(Icons.search),
         ),
+      ),
+    );
+  }
+}
+
+class VacancyDetails extends StatelessWidget {
+  final String vacancyId;
+  final String category;
+
+  VacancyDetails({required this.vacancyId, required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Vacancy Details'),
+      ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance
+            .collection('Internship_Posted')
+            .doc(category)
+            .collection('Opportunities')
+            .doc(vacancyId)
+            .get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text('Vacancy not found.'));
+          }
+
+          var data = snapshot.data!.data() as Map<String, dynamic>;
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(data['title'] ?? 'No Title', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                SizedBox(height: 10),
+                Text('Location: ${data['location'] ?? 'No Location'}', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Text('Duration: ${data['duration'] ?? 'No Duration'}', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Text('Stipend: \$${data['stipend'] ?? 'No Stipend'}', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Text('Requirements: ${data['requirements'] ?? 'No Requirements'}', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Text('Posted on: ${data['postingDate'] != null ? (data['postingDate'] as Timestamp).toDate().toString() : 'No Date'}', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 20),
+                Text('Description', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                SizedBox(height: 10),
+                Text(data['description'] ?? 'No Description', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
