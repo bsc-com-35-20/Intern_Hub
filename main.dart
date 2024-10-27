@@ -33,11 +33,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/Splash', // Set initial route
+      initialRoute: '/LogIn', // Set initial route
 
       routes: {
 
-        '/Splash':(context) => SplashScreen(),
         '/LogIn': (context) => Log_In(), // Define LogIn route
         '/Register': (context) => Register(), // Define Register route
         '/Home': (context) =>HomePage(userRole: '',),
