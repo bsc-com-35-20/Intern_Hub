@@ -97,36 +97,9 @@ class _HomePageState extends State<HomePage> {
 
     // Check user role to build grid items
     if (widget.userRole == 'Intern') {
-      gridItems.add(_buildSquareCard(
-        icon: Icons.lightbulb_outline,
-        text: 'Internship Tips',
-        color: Colors.amberAccent,
-        onTap: () => _navigateTo(InternshipTips()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.group,
-        text: 'Networking Opportunities',
-        color: Colors.greenAccent,
-        onTap: () => _navigateTo(NetworkingOpportunities()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.business_center,
-        text: 'Vacancies',
-        color: Colors.redAccent,
-        onTap: () => _navigateTo(Vacancies()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.work_outline,
-        text: 'My Applications',
-        color: Colors.deepOrange,
-        onTap: () => _navigateTo(Applications()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.person,
-        text: 'Your Profile',
-        color: Colors.blueAccent,
-        onTap: () => _navigateTo(UserDetails()),
-      ));
+      Future.delayed(Duration.zero, () {
+      _navigateTo(Search());
+    });
     } else if (widget.userRole == 'Company') {
       gridItems.add(_buildSquareCard(
         icon: Icons.person,
@@ -202,33 +175,34 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: color,
-            ),
-            SizedBox(height: 10),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
+    onTap: onTap,
+    child: Card(
+      color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
       ),
-    );
-  }
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 36,
+            color: Colors.black87,
+          ),
+          SizedBox(height: 10),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }

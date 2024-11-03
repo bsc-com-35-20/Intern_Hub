@@ -32,6 +32,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        hintColor: Colors.black87,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Roboto',
+        
       ),
       initialRoute: '/LogIn', // Set initial route
 

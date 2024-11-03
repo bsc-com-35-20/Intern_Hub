@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:internhub/Home/Applications.dart';
+import 'package:internhub/Home/FeedbackForm.dart';
+import 'package:internhub/Home/InternshipTips.dart';
+import 'package:internhub/Home/NetworkingOpportunities.dart';
+import 'package:internhub/Home/UserDetails.dart';
+import 'package:internhub/Home/Vacancies.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -92,7 +98,7 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find a Job', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Find a Job', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -102,6 +108,54 @@ class _SearchState extends State<Search> {
           ),
         ],
       ),
+      drawer: Drawer(
+  child: ListView(
+    children: [
+      DrawerHeader(
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+        ),
+        child: Text(
+          'Menu',
+          style: TextStyle(color: Colors.white, fontSize: 24),
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.lightbulb_outline),
+        title: Text('Internship Tips'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => InternshipTips())),
+      ),
+      ListTile(
+        leading: Icon(Icons.group),
+        title: Text('Networking Opportunities'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NetworkingOpportunities())),
+      ),
+      ListTile(
+        leading: Icon(Icons.business_center),
+        title: Text('Vacancies'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Vacancies())),
+      ),
+      ListTile(
+        leading: Icon(Icons.work_outline),
+        title: Text('My Applications'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Applications())),
+      ),
+      ListTile(
+        leading: Icon(Icons.person),
+        title: Text('Your Profile'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserDetails())),
+      ),
+      
+      ListTile(
+        leading: Icon(Icons.feedback),
+        title: Text('Give Feedback'),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm())),
+      ),
+      
+    ],
+  ),
+),
+
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
@@ -114,44 +168,22 @@ class _SearchState extends State<Search> {
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: searchResults.length,
                           itemBuilder: (context, index) {
-                            return Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              color: index == 0 ? Colors.teal : Colors.white,
-                              child: ListTile(
-                                title: Text(
-                                  searchResults[index]['title'],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: index == 0 ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  "${searchResults[index]['category']} - ${searchResults[index]['stipend']}",
-                                  style: TextStyle(
-                                    color: index == 0 ? Colors.white70 : Colors.grey[700],
-                                  ),
-                                ),
-                                trailing: Text(
-                                  '${index == 0 ? "Promoted": "Recommended"}',
-                                  style: TextStyle(
-                                    color: index == 0 ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VacancyDetails(
-                                        vacancyId: searchResults[index]['id'],
-                                        category: searchResults[index]['category'],
-                                      ),
+                            return JobCard(
+                              title: searchResults[index]['title'],
+                              category: searchResults[index]['category'],
+                              stipend: searchResults[index]['stipend'],
+                              isPromoted: index == 0,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VacancyDetails(
+                                      vacancyId: searchResults[index]['id'],
+                                      category: searchResults[index]['category'],
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
@@ -183,6 +215,56 @@ class SearchBar extends StatelessWidget {
           ),
           prefixIcon: Icon(Icons.search),
         ),
+      ),
+    );
+  }
+}
+
+class JobCard extends StatelessWidget {
+  final String title;
+  final String category;
+  final String stipend;
+  final bool isPromoted;
+  final VoidCallback onTap;
+
+  const JobCard({
+    required this.title,
+    required this.category,
+    required this.stipend,
+    required this.isPromoted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      margin: EdgeInsets.symmetric(vertical: 8),
+      color: isPromoted ? Color(0xFF4A90E2) : Colors.white,
+      child: ListTile(
+        contentPadding: EdgeInsets.all(16),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isPromoted ? Colors.white : Colors.black,
+          ),
+        ),
+        subtitle: Text(
+          "$category • $stipend",
+          style: TextStyle(
+            color: isPromoted ? Colors.white70 : Colors.grey[700],
+          ),
+        ),
+        trailing: Text(
+          isPromoted ? 'Promoted' : 'Recommended',
+          style: TextStyle(
+            color: isPromoted ? Colors.white : Colors.black,
+          ),
+        ),
+        onTap: onTap,
       ),
     );
   }
