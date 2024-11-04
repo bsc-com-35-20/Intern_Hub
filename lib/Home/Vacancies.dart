@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:internhub/Home/ApplicationPage.dart';
 
 void main() {
   runApp(InternHubApp());
@@ -252,6 +253,33 @@ class VacancyDetails extends StatelessWidget {
                 Text(
                   data['description'] ?? 'No Description',
                   style: TextStyle(fontSize: 16),
+                ),
+                Center(
+                  child: ElevatedButton(
+                         onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ApplicationPage(
+                                vacancyId: vacancyId,
+                                vacancyTitle: data['title'] ?? 'Vacancy',
+                                category: category,
+                              ),
+                            ),
+                          );
+                        },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Apply Internship',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
               ],
             ),
