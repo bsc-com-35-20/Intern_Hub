@@ -58,6 +58,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to submit application. Please try again.')),
       );
+      print(e);
     }
   }
 }
