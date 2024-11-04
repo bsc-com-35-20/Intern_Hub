@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internhub/Home/Applications.dart';
 import 'package:internhub/Home/Applicationpage.dart';
 import 'package:internhub/Home/FeedbackForm.dart';
@@ -7,6 +9,7 @@ import 'package:internhub/Home/InternshipTips.dart';
 import 'package:internhub/Home/NetworkingOpportunities.dart';
 import 'package:internhub/Home/UserDetails.dart';
 import 'package:internhub/Home/Vacancies.dart';
+import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
 
 
 void main() {
@@ -26,17 +29,32 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> internships = [];
   List<Map<String, dynamic>> searchResults = [];
   bool isLoading = false;
+
+  String? selectedCategory;
 
   @override
   void initState() {
     super.initState();
     _fetchInternships();
   }
-
+  void _showSuccessToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      textColor: Colors.green,
+      fontSize: 16.0,
+    );
+  }
+Future<void> _logout() async {
+    await _auth.signOut();
+    _showSuccessToast("Logged out successfully");
+    Navigator.pushReplacementNamed(context, '/LogIn'); // Navigate to login screen after logout
+  }
   Future<void> _fetchInternships() async {
     setState(() {
       isLoading = true;
@@ -96,6 +114,54 @@ class _SearchState extends State<Search> {
     );
   }
 
+  void _showCategoryFilterModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Filter by Category', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 16),
+
+              // Category Filter
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Category'),
+                value: selectedCategory,
+                items: ['Marketing', 'Design', 'Engineering', 'Business'].map((category) {
+                  return DropdownMenuItem(value: category, child: Text(category));
+                }).toList(),
+                onChanged: (value) => setState(() => selectedCategory = value),
+              ),
+              SizedBox(height: 16),
+
+              // Apply Filter Button
+              ElevatedButton(
+                onPressed: _applyCategoryFilter,
+                child: Text('Apply Filter'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _applyCategoryFilter() {
+    Navigator.pop(context);  // Close the modal
+    setState(() {
+      searchResults = internships.where((internship) {
+        return selectedCategory == null || internship['category'] == selectedCategory;
+      }).toList();
+    });
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +172,7 @@ class _SearchState extends State<Search> {
         actions: [
           IconButton(
             icon: Icon(Icons.filter_list, color: Colors.black),
-            onPressed: () {},
+            onPressed:_showCategoryFilterModal,
           ),
         ],
       ),
@@ -151,6 +217,11 @@ class _SearchState extends State<Search> {
               leading: Icon(Icons.feedback),
               title: Text('Give Feedback'),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm())),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Log_In())),
             ),
           ],
         ),
