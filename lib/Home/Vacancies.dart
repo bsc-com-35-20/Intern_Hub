@@ -12,7 +12,7 @@ class InternHubApp extends StatelessWidget {
     return MaterialApp(
       title: 'InternHub',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
 

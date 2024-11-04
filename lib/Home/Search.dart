@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:internhub/Home/Applications.dart';
+import 'package:internhub/Home/Applicationpage.dart';
 import 'package:internhub/Home/FeedbackForm.dart';
 import 'package:internhub/Home/InternshipTips.dart';
 import 'package:internhub/Home/NetworkingOpportunities.dart';
 import 'package:internhub/Home/UserDetails.dart';
 import 'package:internhub/Home/Vacancies.dart';
+
 
 void main() {
   runApp(MaterialApp(
@@ -109,53 +111,50 @@ class _SearchState extends State<Search> {
         ],
       ),
       drawer: Drawer(
-  child: ListView(
-    children: [
-      DrawerHeader(
-        decoration: BoxDecoration(
-          color: Colors.blueAccent,
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.lightbulb_outline),
+              title: Text('Internship Tips'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => InternshipTips())),
+            ),
+            ListTile(
+              leading: Icon(Icons.group),
+              title: Text('Networking Opportunities'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NetworkingOpportunities())),
+            ),
+            ListTile(
+              leading: Icon(Icons.business_center),
+              title: Text('Vacancies'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Vacancies())),
+            ),
+            ListTile(
+              leading: Icon(Icons.work_outline),
+              title: Text('My Applications'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Applications())),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Your Profile'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserDetails())),
+            ),
+            ListTile(
+              leading: Icon(Icons.feedback),
+              title: Text('Give Feedback'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm())),
+            ),
+          ],
         ),
-        child: Text(
-          'Menu',
-          style: TextStyle(color: Colors.white, fontSize: 24),
-        ),
       ),
-      ListTile(
-        leading: Icon(Icons.lightbulb_outline),
-        title: Text('Internship Tips'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => InternshipTips())),
-      ),
-      ListTile(
-        leading: Icon(Icons.group),
-        title: Text('Networking Opportunities'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NetworkingOpportunities())),
-      ),
-      ListTile(
-        leading: Icon(Icons.business_center),
-        title: Text('Vacancies'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Vacancies())),
-      ),
-      ListTile(
-        leading: Icon(Icons.work_outline),
-        title: Text('My Applications'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Applications())),
-      ),
-      ListTile(
-        leading: Icon(Icons.person),
-        title: Text('Your Profile'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserDetails())),
-      ),
-      
-      ListTile(
-        leading: Icon(Icons.feedback),
-        title: Text('Give Feedback'),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm())),
-      ),
-      
-    ],
-  ),
-),
-
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
@@ -318,6 +317,34 @@ class VacancyDetails extends StatelessWidget {
                 Text('Description', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
                 Text(data['description'] ?? 'No Description', style: TextStyle(fontSize: 16)),
+                SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ApplicationPage(
+                            vacancyId: vacancyId,
+                            vacancyTitle: data['title'] ?? 'Vacancy',
+                            category: category,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Apply Internship',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
