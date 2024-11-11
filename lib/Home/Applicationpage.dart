@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:internhub/Home/success.dart';
+
 
 class ApplicationPage extends StatefulWidget {
   final String vacancyId;
   final String vacancyTitle;
   final String category;
 
-  ApplicationPage({required this.vacancyId, required this.vacancyTitle, required this.category});
+  ApplicationPage(
+      {required this.vacancyId,
+      required this.vacancyTitle,
+      required this.category});
 
   @override
   _ApplicationPageState createState() => _ApplicationPageState();
@@ -18,58 +23,59 @@ class _ApplicationPageState extends State<ApplicationPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController coverLetterController = TextEditingController();
+  final TextEditingController referralNameController = TextEditingController();
+  final TextEditingController referralTitleController = TextEditingController();
+  final TextEditingController referralOrganizationController = TextEditingController();
+  final TextEditingController referralContactController = TextEditingController();
+  final TextEditingController referralRelationshipController = TextEditingController();
+
 
   Future<void> _submitApplication() async {
-  if (_formKey.currentState!.validate()) {
-    try {
-      // Add the application to the "Applications" collection for general tracking
-      await FirebaseFirestore.instance.collection('Applications').add({
-        'vacancyId': widget.vacancyId,
-        'vacancyTitle': widget.vacancyTitle,
-        'category': widget.category,
-        'name': nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
-        'coverLetter': coverLetterController.text,
-        'appliedAt': DateTime.now(),
-      });
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Add the application to the "Applications" collection for general tracking
+        await FirebaseFirestore.instance.collection('Applications').add({
+          'vacancyId': widget.vacancyId,
+          'vacancyTitle': widget.vacancyTitle,
+          'category': widget.category,
+          'name': nameController.text,
+          'email': emailController.text,
+          'phone': phoneController.text,
+          'coverLetter': coverLetterController.text,
+          'referral': {
+          'name': referralNameController.text,
+          'title': referralTitleController.text,
+          'organization': referralOrganizationController.text,
+          'contact': referralContactController.text,
+          'relationship': referralRelationshipController.text,
+        },
+          'appliedAt': DateTime.now(),
+        });
 
-      // Also add the application under the specific vacancy in "Manage Internships"
-      await FirebaseFirestore.instance
-          .collection('Internship_Posted')
-          .doc(widget.category)
-          .collection('Opportunities')
-          .doc(widget.vacancyId) // Using vacancyId as document ID
-          .collection('Applications')
-          .add({
-        'name': nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
-        'coverLetter': coverLetterController.text,
-        'appliedAt': DateTime.now(),
-      });
+        // Also add the application under the specific vacancy in "Manage Internships"
+        await sendApplicationEmail();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Application submitted successfully!')),
-      );
-
-      Navigator.pop(context); // Close the application page
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit application. Please try again.')),
-      );
-      print(e);
+        print("Navigating to SuccessPage...");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SuccessPage()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to submit application. Please try again.')),
+        );
+        print(e);
+      }
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Apply for ${widget.vacancyTitle}'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: const Color.fromARGB(255, 4, 171, 151),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -115,6 +121,27 @@ class _ApplicationPageState extends State<ApplicationPage> {
                 },
               ),
               SizedBox(height: 10),
+                            TextFormField(
+                controller: referralNameController,
+                decoration: InputDecoration(labelText: 'Referral Name'),
+              ),
+              TextFormField(
+                controller: referralTitleController,
+                decoration: InputDecoration(labelText: 'Referral Title'),
+              ),
+              TextFormField(
+                controller: referralOrganizationController,
+                decoration: InputDecoration(labelText: 'Referral Organization'),
+              ),
+              TextFormField(
+                controller: referralContactController,
+                decoration: InputDecoration(labelText: 'Referral Contact Info'),
+              ),
+              TextFormField(
+                controller: referralRelationshipController,
+                decoration: InputDecoration(labelText: 'Referral Relationship'),
+              ),
+
               TextFormField(
                 controller: coverLetterController,
                 decoration: InputDecoration(labelText: 'Cover Letter'),
@@ -130,13 +157,14 @@ class _ApplicationPageState extends State<ApplicationPage> {
               ElevatedButton(
                 onPressed: _submitApplication,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: const Color.fromARGB(255, 4, 171, 151),
                   padding: EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text('Submit Application', style: TextStyle(fontSize: 18)),
+                child:
+                    Text('Submit Application', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

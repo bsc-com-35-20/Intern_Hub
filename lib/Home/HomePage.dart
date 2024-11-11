@@ -98,33 +98,10 @@ class _HomePageState extends State<HomePage> {
     // Check user role to build grid items
     if (widget.userRole == 'Intern') {
       Future.delayed(Duration.zero, () {
-      _navigateTo(Search());
-    });
+        _navigateTo(Search());
+      });
     } else if (widget.userRole == 'Company') {
-      gridItems.add(_buildSquareCard(
-        icon: Icons.person,
-        text: 'Your Profile',
-        color: Colors.blueAccent,
-        onTap: () => _navigateTo(UserDetails()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.group,
-        text: 'Networking Opportunities',
-        color: Colors.greenAccent,
-        onTap: () => _navigateTo(NetworkingOpportunities()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.business,
-        text: 'For Companies',
-        color: Colors.tealAccent,
-        onTap: () => _navigateTo(EmployersDashBoard()),
-      ));
-      gridItems.add(_buildSquareCard(
-        icon: Icons.feedback,
-        text: 'Give Feedback',
-        color: Colors.purpleAccent,
-        onTap: () => _navigateTo(FeedbackForm()),
-      ));
+      _navigateTo(EmployersDashBoard());
     }
 
     return gridItems;
@@ -160,7 +137,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => Log_In()),
-          (Route<dynamic> route) => false,
+      (Route<dynamic> route) => false,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -175,34 +152,34 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-    onTap: onTap,
-    child: Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 36,
-            color: Colors.black87,
-          ),
-          SizedBox(height: 10),
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+      onTap: onTap,
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 36,
               color: Colors.black87,
             ),
-          ),
-        ],
+            SizedBox(height: 10),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
