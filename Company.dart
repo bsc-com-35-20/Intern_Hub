@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -177,7 +179,7 @@ class _PostInternshipState extends State<PostInternship> {
   String? _requirements;
   String? _location;
   String? _duration;
-  String? _stipend;
+  double? _stipend;
   String? _category;
 
   // Firestore instance
@@ -226,7 +228,7 @@ class _PostInternshipState extends State<PostInternship> {
               }),
               SizedBox(height: 16),
               _buildTextField('Stipend (if applicable)', false, (value) {
-                _stipend = value;
+                _stipend = value as double?;
               }),
               SizedBox(height: 16),
               _buildDropdown((value) {

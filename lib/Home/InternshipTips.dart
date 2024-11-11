@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:internhub/Home/Tips.dart';
 
 class InternshipTips extends StatelessWidget {
   // Sample list of internship tips
