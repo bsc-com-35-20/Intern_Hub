@@ -78,6 +78,7 @@ class ManageInternship extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
+            // Replace with dynamic data fetching
             _buildInternshipCard('Software Development Intern', 'In Progress',
                 'internshipId1', 'Software', context),
             _buildInternshipCard('Marketing Intern', 'Completed',
@@ -89,27 +90,4 @@ class ManageInternship extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget _buildInternshipCard(String title, String status, BuildContext context) {
-  return Card(
-    elevation: 5,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
-    margin: EdgeInsets.symmetric(vertical: 10),
-    child: ListTile(
-      leading: Icon(Icons.work_outline, color: Colors.teal, size: 30),
-      title: Text(
-        title,
-        style: TextStyle(
-            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
-      ),
-      subtitle: Text('Status: $status'),
-      trailing: Icon(Icons.arrow_forward_ios, color: Colors.teal),
-      onTap: () {
-        // Navigate to more details about the internship
-      },
-    ),
-  );
 }
