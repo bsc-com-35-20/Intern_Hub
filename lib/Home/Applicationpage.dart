@@ -20,45 +20,51 @@ class _ApplicationPageState extends State<ApplicationPage> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController coverLetterController = TextEditingController();
 
-  Future<void> _submitApplication() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final applicationData = {
-          'vacancyId': widget.vacancyId,
-          'vacancyTitle': widget.vacancyTitle,
-          'category': widget.category,
-          'name': nameController.text,
-          'email': emailController.text,
-          'phone': phoneController.text,
-          'coverLetter': coverLetterController.text,
-          'appliedAt': DateTime.now(),
-        };
+ Future<void> _submitApplication() async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      final applicationData = {
+        'vacancyId': widget.vacancyId,
+        'vacancyTitle': widget.vacancyTitle,
+        'category': widget.category,
+        'name': nameController.text,
+        'email': emailController.text,
+        'phone': phoneController.text,
+        'coverLetter': coverLetterController.text,
+        'appliedAt': DateTime.now(),
+      };
 
-        // Add to the general Applications collection
-        await FirebaseFirestore.instance.collection('Applications').add(applicationData);
+      // Add to the general Applications collection
+      await FirebaseFirestore.instance.collection('Applications').add(applicationData);
 
-        // Add to specific internship application list
-        await FirebaseFirestore.instance
-            .collection('Internship_Posted')
-            .doc(widget.category)
-            .collection('Opportunities')
-            .doc(widget.vacancyId)
-            .collection('Applications')
-            .add(applicationData);
+      // Add to specific internship application list
+      await FirebaseFirestore.instance
+          .collection('Internship_Posted')
+          .doc(widget.category)
+          .collection('Opportunities')
+          .doc(widget.vacancyId)
+          .collection('Applications')
+          .add(applicationData);
 
-        // Navigate to success page on successful submission
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SuccessPage()),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit application. Please try again.')),
-        );
-        print(e);
-      }
+      // Small delay for Firestore updates
+      await Future.delayed(Duration(milliseconds: 200));
+
+      // Navigate to success page only if the context is valid
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SuccessPage()),
+      );
+    } catch (e) {
+      // Show error message if submission fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit application. Please try again.')),
+      );
+      print(e);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

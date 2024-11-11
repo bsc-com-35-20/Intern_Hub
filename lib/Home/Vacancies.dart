@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:internhub/Home/ApplicationPage.dart';
 
+
 void main() {
   runApp(InternHubApp());
 }
@@ -255,7 +256,7 @@ class VacancyDetails extends StatelessWidget {
                   data['description'] ?? 'No Description',
                   style: TextStyle(fontSize: 16),
                 ),
-                Center(
+               Center(
                   child: ElevatedButton(
                          onPressed: () {
                           Navigator.push(

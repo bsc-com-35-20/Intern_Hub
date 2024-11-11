@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Search()),
+                MaterialPageRoute(builder: (context) => FeedbackForm()),
               );
             },
           ),
@@ -92,19 +92,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Widget> _buildGridItems() {
-    List<Widget> gridItems = [];
+  List<Widget> gridItems = [];
 
-    // Check user role to build grid items
-    if (widget.userRole == 'Intern') {
-      Future.delayed(Duration.zero, () {
-        _navigateTo(Search());
-      });
-    } else if (widget.userRole == 'Company') {
+  // Check user role to build grid items
+  if (widget.userRole == 'Intern') {
+    // Schedule the navigation outside of the build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateTo(Search());
+    });
+  } else if (widget.userRole == 'Company') {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _navigateTo(EmployersDashBoard());
-    }
-
-    return gridItems;
+    });
   }
+
+  return gridItems;
+}
 
   void _navigateTo(Widget page) {
     Navigator.push(
