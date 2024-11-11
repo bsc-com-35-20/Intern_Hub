@@ -197,7 +197,7 @@ Future<void> uploadProfileImage(File imageFile) async {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.teal,
         padding: EdgeInsets.symmetric(vertical: 15.0),
         textStyle: TextStyle(fontSize: 18),
         shape: RoundedRectangleBorder(
@@ -257,7 +257,7 @@ Future<void> uploadProfileImage(File imageFile) async {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.orangeAccent),
+              borderSide: BorderSide(color: Colors.teal),
             ),
           ),
           style: TextStyle(fontSize: 16),

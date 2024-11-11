@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:internhub/Home/InternshipTips.dart';  // Import your InternshipTips page
-import 'package:internhub/Home/NetworkingOpportunities.dart';  // Import your NetworkingOpportunities page
+import 'package:internhub/Home/InternshipTips.dart'; // Import your InternshipTips page
+import 'package:internhub/Home/NetworkingOpportunities.dart'; // Import your NetworkingOpportunities page
 
 class TipsPage extends StatelessWidget {
   @override
@@ -14,10 +14,14 @@ class TipsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title for the page
+            // Title for the page with teal color
             Text(
               "Choose a tip category:",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal, // Set the text color to teal
+              ),
             ),
             SizedBox(height: 20),
 
@@ -31,7 +35,8 @@ class TipsPage extends StatelessWidget {
                       // Navigate to Internship Tips page
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => InternshipTips()),
+                        MaterialPageRoute(
+                            builder: (context) => InternshipTips()),
                       );
                     },
                     title: Text("Internship Tips"),
@@ -44,7 +49,8 @@ class TipsPage extends StatelessWidget {
                       // Navigate to Networking Opportunities page
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => NetworkingOpportunities()),
+                        MaterialPageRoute(
+                            builder: (context) => NetworkingOpportunities()),
                       );
                     },
                     title: Text("Networking Tips"),

@@ -220,13 +220,7 @@ class _SearchState extends State<Search> {
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => TipsPage())),
             ),
-            
-            ListTile(
-              leading: Icon(Icons.business_center),
-              title: Text('Vacancies'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Vacancies())),
-            ),
+           
             ListTile(
               leading: Icon(Icons.work_outline),
               title: Text('My Applications'),
