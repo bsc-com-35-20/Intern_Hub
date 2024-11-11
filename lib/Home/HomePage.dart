@@ -11,8 +11,7 @@ import 'package:internhub/LogIn_ And_Register/Log_In.dart';
 import 'package:internhub/Home/NetworkingOpportunities.dart';
 import 'package:internhub/Home/InterviewPreparation.dart';
 import 'package:internhub/Home/FeedbackForm.dart';
-
-import 'package:internhub/Company/EmployersDashBoard.dart';
+import 'package:internhub/Company/employers_dashboard.dart';
 
 class HomePage extends StatefulWidget {
   final String userRole; // Role to be passed in the constructor

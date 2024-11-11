@@ -152,7 +152,7 @@ class _VacanciesState extends State<Vacancies> {
                         color: Colors.redAccent,
                       ),
                       onTap: () {
-                        Navigator.push(
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => VacancyDetails(
@@ -161,6 +161,7 @@ class _VacanciesState extends State<Vacancies> {
                             ),
                           ),
                         );
+
                       },
                     ),
                   );
