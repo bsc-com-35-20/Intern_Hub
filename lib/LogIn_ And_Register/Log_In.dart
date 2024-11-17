@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // Import FCM
 import 'package:internhub/Home/HomePage.dart';
 
 class Log_In extends StatelessWidget {
@@ -31,6 +32,30 @@ bool isMobileScreen(BuildContext context) {
 
 bool isDesktopScreen(BuildContext context) {
   return MediaQuery.of(context).size.width >= 800;
+}
+
+// Notification Logic
+Future<void> saveUserToken(String userId) async {
+  try {
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({'fcmToken': token});
+    }
+  } catch (e) {
+    print("Error saving FCM token: $e");
+  }
+}
+
+Future<void> sendNotification(String token, String title, String body) async {
+  // Implement your FCM notification logic (similar to the earlier example)
+}
+
+Future<void> notifyUser(String userId, String title, String body) async {
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+  String? token = userDoc['fcmToken'];
+  if (token != null) {
+    await sendNotification(token, title, body);
+  }
 }
 
 // Shared Login Widget
@@ -162,6 +187,7 @@ class LoginForm extends StatelessWidget {
   }
 }
 
+// Company Login
 class CompanyLogin extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -172,9 +198,9 @@ class CompanyLogin extends StatelessWidget {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      // Check company name
       final companyName = _companyNameController.text.trim();
       final email = _emailController.text.trim();
+
       final isValidCompany = await FirebaseFirestore.instance
           .collection('Company_Details')
           .doc(email)
@@ -186,11 +212,12 @@ class CompanyLogin extends StatelessWidget {
         return;
       }
 
-      // Sign in with Firebase
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: _passwordController.text.trim(),
       );
+
+      await saveUserToken(userCredential.user!.uid);
 
       Navigator.pushReplacement(
         context,
@@ -198,8 +225,8 @@ class CompanyLogin extends StatelessWidget {
           builder: (context) => HomePage(userRole: 'Company'),
         ),
       );
-    } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(msg: e.message ?? 'An error occurred during login.');
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'An error occurred during login.');
     }
   }
 
@@ -216,6 +243,7 @@ class CompanyLogin extends StatelessWidget {
   }
 }
 
+// Intern Login
 class InternLogin extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -225,11 +253,12 @@ class InternLogin extends StatelessWidget {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      // Sign in with Firebase
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      await saveUserToken(userCredential.user!.uid);
 
       Navigator.pushReplacement(
         context,
@@ -237,8 +266,8 @@ class InternLogin extends StatelessWidget {
           builder: (context) => HomePage(userRole: 'Intern'),
         ),
       );
-    } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(msg: e.message ?? 'An error occurred during login.');
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'An error occurred during login.');
     }
   }
 
