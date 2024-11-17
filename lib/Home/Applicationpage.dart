@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:internhub/Home/success.dart';
 
 class ApplicationPage extends StatefulWidget {
@@ -19,52 +20,81 @@ class _ApplicationPageState extends State<ApplicationPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController coverLetterController = TextEditingController();
+  final TextEditingController referralNameController = TextEditingController();
+  final TextEditingController referralTitleController = TextEditingController();
+  final TextEditingController referralOrganizationController = TextEditingController();
+  final TextEditingController referralContactController = TextEditingController();
+  final TextEditingController referralRelationController = TextEditingController();
 
- Future<void> _submitApplication() async {
-  if (_formKey.currentState!.validate()) {
-    try {
-      final applicationData = {
-        'vacancyId': widget.vacancyId,
-        'vacancyTitle': widget.vacancyTitle,
-        'category': widget.category,
-        'name': nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
-        'coverLetter': coverLetterController.text,
-        'appliedAt': DateTime.now(),
-      };
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
 
-      // Add to the general Applications collection
-      await FirebaseFirestore.instance.collection('Applications').add(applicationData);
+  Future<void> _loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
 
-      // Add to specific internship application list
-      await FirebaseFirestore.instance
-          .collection('Internship_Posted')
-          .doc(widget.category)
-          .collection('Opportunities')
-          .doc(widget.vacancyId)
-          .collection('Applications')
-          .add(applicationData);
-
-      // Small delay for Firestore updates
-      await Future.delayed(Duration(milliseconds: 200));
-
-      // Navigate to success page only if the context is valid
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SuccessPage()),
-      );
-    } catch (e) {
-      // Show error message if submission fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit application. Please try again.')),
-      );
-      print(e);
+    if (user != null) {
+      nameController.text = user.displayName ?? '';
+      emailController.text = user.email ?? '';
+      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        phoneController.text = userDoc.data()?['phone'] ?? '';
+      }
     }
   }
-}
 
+  Future<void> _submitApplication() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        final applicationData = {
+          'vacancyId': widget.vacancyId,
+          'vacancyTitle': widget.vacancyTitle,
+          'category': widget.category,
+          'name': nameController.text,
+          'email': emailController.text,
+          'phone': phoneController.text,
+          'coverLetter': coverLetterController.text,
+          'referral': {
+            'name': referralNameController.text,
+            'title': referralTitleController.text,
+            'organization': referralOrganizationController.text,
+            'contact': referralContactController.text,
+            'relation': referralRelationController.text,
+          },
+          'appliedAt': DateTime.now(),
+        };
+
+        // Add to the general Applications collection
+        await FirebaseFirestore.instance.collection('Applications').add(applicationData);
+
+        // Add to specific internship application list
+        await FirebaseFirestore.instance
+            .collection('Internship_Posted')
+            .doc(widget.category)
+            .collection('Opportunities')
+            .doc(widget.vacancyId)
+            .collection('Applications')
+            .add(applicationData);
+
+        // Small delay for Firestore updates
+        await Future.delayed(Duration(milliseconds: 200));
+
+        // Navigate to success page only if the context is valid
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SuccessPage()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit application. Please try again.')),
+        );
+        print(e);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +157,33 @@ class _ApplicationPageState extends State<ApplicationPage> {
                   }
                   return null;
                 },
+              ),
+              SizedBox(height: 20),
+              Text('Referral Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: referralNameController,
+                decoration: InputDecoration(labelText: 'Referral Name'),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: referralTitleController,
+                decoration: InputDecoration(labelText: 'Referral Title'),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: referralOrganizationController,
+                decoration: InputDecoration(labelText: 'Referral Organization'),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: referralContactController,
+                decoration: InputDecoration(labelText: 'Referral Contact'),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: referralRelationController,
+                decoration: InputDecoration(labelText: 'Relation to Referral'),
               ),
               SizedBox(height: 20),
               ElevatedButton(

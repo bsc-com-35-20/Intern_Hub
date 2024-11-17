@@ -146,7 +146,7 @@ class _SearchState extends State<Search> {
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: 'Category'),
                 value: selectedCategory,
-                items: ['Marketing', 'Design', 'Engineering', 'Business']
+                items: ['Marketing', 'Design', 'Finance', 'Software']
                     .map((category) {
                   return DropdownMenuItem(
                       value: category, child: Text(category));

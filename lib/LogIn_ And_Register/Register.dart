@@ -12,6 +12,7 @@ class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -25,7 +26,10 @@ class _RegisterState extends State<Register> {
   Future<void> _saveCompanyDetails(User user) async {
     try {
       // Save company details in Firestore
-      await FirebaseFirestore.instance.collection('Company_Details').doc(user.email).set({
+      await FirebaseFirestore.instance
+          .collection('Company_Details')
+          .doc(user.email)
+          .set({
         'companyName': _companyNameController.text.trim(),
         'email': user.email,
         'companyAddress': _companyAddressController.text.trim(),
@@ -49,6 +53,7 @@ class _RegisterState extends State<Register> {
           .set({
         'name': _nameController.text.trim(),
         'email': user.email,
+        'phone number': _phoneNumberController,
         'age': _ageController.text.trim(),
         'gender': _selectedGender,
         'createdAt': Timestamp.now(),
@@ -75,7 +80,8 @@ class _RegisterState extends State<Register> {
     if (_formKey.currentState?.validate() ?? false) {
       try {
         // Create user with email and password
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -104,7 +110,8 @@ class _RegisterState extends State<Register> {
     if (_formKey.currentState?.validate() ?? false) {
       try {
         // Create user with email and password
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -164,7 +171,10 @@ class _RegisterState extends State<Register> {
                       children: [
                         Text(
                           'Register',
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
+                          style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue),
                         ),
                         SizedBox(height: 20),
 
@@ -193,7 +203,8 @@ class _RegisterState extends State<Register> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _isCompany ? _registerCompany : _registerIntern,
+                            onPressed:
+                                _isCompany ? _registerCompany : _registerIntern,
                             child: Text('Register'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(16),
@@ -210,7 +221,8 @@ class _RegisterState extends State<Register> {
                           onTap: () {
                             Navigator.pushReplacementNamed(context, '/LogIn');
                           },
-                          child: Text('Already have an Account? Log In', style: TextStyle(color: Colors.blue)),
+                          child: Text('Already have an Account? Log In',
+                              style: TextStyle(color: Colors.blue)),
                         ),
                       ],
                     ),
@@ -369,7 +381,9 @@ class _RegisterState extends State<Register> {
             fillColor: Colors.grey[200],
             suffixIcon: IconButton(
               icon: Icon(
-                _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                _obscureConfirmPassword
+                    ? Icons.visibility_off
+                    : Icons.visibility,
               ),
               onPressed: () {
                 setState(() {
@@ -502,7 +516,9 @@ class _RegisterState extends State<Register> {
             fillColor: Colors.grey[200],
             suffixIcon: IconButton(
               icon: Icon(
-                _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                _obscureConfirmPassword
+                    ? Icons.visibility_off
+                    : Icons.visibility,
               ),
               onPressed: () {
                 setState(() {

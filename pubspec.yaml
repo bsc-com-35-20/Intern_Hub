@@ -31,7 +31,7 @@ dependencies:
   flutter_local_notifications: ^17.2.2
   url_launcher: ^6.0.20
   searchfield: ^1.1.6
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^3.0.0
   http: ^1.2.2
 
   # New dependencies for profile functionality
