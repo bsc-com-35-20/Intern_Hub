@@ -6,4 +6,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
   }
+
+    match /databases/{database}/documents {
+    match /Accepted_Interns/{document=**} {
+      allow read: if request.auth != null; // Authenticated users only
+    }
+  }
 }

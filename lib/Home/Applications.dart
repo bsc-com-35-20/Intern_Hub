@@ -171,7 +171,7 @@ class _ApplicationsState extends State<Applications> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ApplicationDetailPage(application: application),
+              builder: (context) => ApplicationDetailPage(application: application, applicationId: '',),
             ),
           );
         },
@@ -183,7 +183,7 @@ class _ApplicationsState extends State<Applications> {
 class ApplicationDetailPage extends StatelessWidget {
   final Application application;
 
-  ApplicationDetailPage({required this.application});
+  ApplicationDetailPage({required this.application, required String applicationId});
 
   @override
   Widget build(BuildContext context) {

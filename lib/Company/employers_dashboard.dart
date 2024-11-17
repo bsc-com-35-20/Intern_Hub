@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:internhub/Company/accepted_interns.dart';
 import 'package:internhub/Company/internship_alerts.dart';
 import 'package:internhub/Company/manage_internships.dart';
 import 'package:internhub/Company/post_internship.dart';
+
 
 class EmployersDashBoard extends StatelessWidget {
   @override
@@ -110,6 +112,15 @@ class EmployersDashBoard extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (context) => ManageInternship()));
             },
           ),
+           _buildOptionTile(
+            icon: Icons.assessment,
+            title: 'Accepted Interns',
+            subtitle: 'Track the interns you have so far.',
+            color: Colors.teal,
+         onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AcceptedInternsPage()));
+            },
+           ),
           _buildOptionTile(
             icon: Icons.analytics,
             title: 'Internship Analytics',

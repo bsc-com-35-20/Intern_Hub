@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +16,8 @@ class _RegisterState extends State<Register> {
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _phoneNumberController = TextEditingController();
+  final _hobbiesController = TextEditingController();
+  final _skillsController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -44,6 +49,32 @@ class _RegisterState extends State<Register> {
     }
   }
 
+   File? _profileImage;
+  String? _profileImageUrl;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _uploadProfileImage(User user) async {
+    if (_profileImage != null) {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures')
+          .child('${user.email}.jpg');
+
+      await storageRef.putFile(_profileImage!);
+      _profileImageUrl = await storageRef.getDownloadURL();
+    }
+  }
+
   Future<void> _saveInternDetails(User user) async {
     try {
       // Save intern details in Firestore
@@ -56,6 +87,8 @@ class _RegisterState extends State<Register> {
         'phone number': _phoneNumberController,
         'age': _ageController.text.trim(),
         'gender': _selectedGender,
+        'hobbies': _hobbiesController,
+        'skills': _skillsController,
         'createdAt': Timestamp.now(),
       });
 
@@ -66,7 +99,26 @@ class _RegisterState extends State<Register> {
       print('Error saving intern details: $e');
     }
   }
-
+    Widget _buildProfileImagePicker() {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: _pickImage,
+          child: CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.grey[300],
+            backgroundImage:
+                _profileImage != null ? FileImage(_profileImage!) : null,
+            child: _profileImage == null
+                ? Icon(Icons.camera_alt, size: 50, color: Colors.grey)
+                : null,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text('Tap to add a profile picture'),
+      ],
+    );
+  }
   void _showSuccessToast([String message = "Registered Successfully"]) {
     Fluttertoast.showToast(
       msg: message,
@@ -240,6 +292,8 @@ class _RegisterState extends State<Register> {
   Widget _buildInternForm() {
     return Column(
       children: [
+        _buildProfileImagePicker(),
+        SizedBox(height: 20),
         // Name Field
         TextFormField(
           controller: _nameController,
