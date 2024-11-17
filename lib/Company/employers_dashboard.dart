@@ -107,7 +107,7 @@ class EmployersDashBoard extends StatelessWidget {
             subtitle: 'Track the progress of your interns, assign tasks, and provide valuable feedback.',
             color: Colors.teal,
          onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ManageInternship(employerId: '',)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ManageInternship()));
             },
           ),
           _buildOptionTile(
