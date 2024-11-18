@@ -1,16 +1,9 @@
 
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internhub/Home/Applications.dart';
 import 'package:internhub/Home/Applicationpage.dart';
-import 'package:internhub/Home/FeedbackForm.dart';
-import 'package:internhub/Home/Tips.dart';
-import 'package:internhub/Home/UserDetails.dart';
-import 'package:internhub/Home/Vacancies.dart';
-import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -52,20 +45,13 @@ class _SearchState extends State<Search> {
     );
   }
 
-  Future<void> _logout() async {
-    await _auth.signOut();
-    _showSuccessToast("Logged out successfully");
-    Navigator.pushReplacementNamed(
-        context, '/LogIn'); // Navigate to login screen after logout
-  }
-
   Future<void> _fetchInternships() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      List<String> categories = ['Marketing', 'Design'];
+      List<String> categories = ['Design', 'Marketing', 'Finance', 'Software'];
       List<Map<String, dynamic>> fetchedInternships = [];
 
       for (String category in categories) {
@@ -75,30 +61,33 @@ class _SearchState extends State<Search> {
             .collection('Opportunities')
             .get();
 
-        querySnapshot.docs.forEach((doc) {
-          var stipendValue = doc['stipend'];
+        for (var doc in querySnapshot.docs) {
+          var data = doc.data() as Map<String, dynamic>;
+
           double stipend = 0.0;
-        if (stipendValue is num) {
-          stipend = stipendValue.toDouble();
-        } else if (stipendValue is String) {
-          stipend = double.tryParse(stipendValue) ?? 0.0;
-        }
+          if (data['stipend'] is num) {
+            stipend = (data['stipend'] as num).toDouble();
+          } else if (data['stipend'] is String) {
+            stipend = double.tryParse(data['stipend']) ?? 0.0;
+          }
+
           fetchedInternships.add({
             'id': doc.id,
-            'title': doc['title'] ?? 'No Title',
-            'description': doc['description'] ?? 'No Description',
+            'title': data['title'] ?? 'No Title',
+            'description': data['description'] ?? 'No Description',
             'category': category,
-            'duration': doc['duration'] ?? 'No Duration',
-            'location': doc['location'] ?? 'No Location',
-            'requirements': doc['requirements'] ?? 'No Requirements',
+            'duration': data['duration'] ?? 'No Duration',
+            'location': data['location'] ?? 'No Location',
+            'requirements': data['requirements'] ?? 'No Requirements',
             'stipend': stipend,
-            'postingDate': (doc['timestamp'] as Timestamp).toDate(),
-            'deadline': (doc['timestamp'] as Timestamp)
-                .toDate()
+            'postingDate': (data['timestamp'] as Timestamp?)?.toDate(),
+            'deadline': (data['timestamp'] as Timestamp?)
+                ?.toDate()
                 .add(Duration(days: 14)),
           });
-        });
+        }
       }
+
       fetchedInternships.sort((a, b) => b['stipend'].compareTo(a['stipend']));
 
       setState(() {
@@ -107,11 +96,11 @@ class _SearchState extends State<Search> {
       });
     } catch (e) {
       _showSnackBar('Error fetching internships: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   void onQueryChanged(String query) {
@@ -125,7 +114,7 @@ class _SearchState extends State<Search> {
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -141,8 +130,6 @@ class _SearchState extends State<Search> {
               Text('Filter by Category',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 16),
-
-              // Category Filter
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: 'Category'),
                 value: selectedCategory,
@@ -154,14 +141,9 @@ class _SearchState extends State<Search> {
                 onChanged: (value) => setState(() => selectedCategory = value),
               ),
               SizedBox(height: 16),
-
-              // Apply Filter Button
               ElevatedButton(
                 onPressed: _applyCategoryFilter,
                 child: Text('Apply Filter'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                ),
               ),
             ],
           ),
@@ -171,7 +153,7 @@ class _SearchState extends State<Search> {
   }
 
   void _applyCategoryFilter() {
-    Navigator.pop(context); // Close the modal
+    Navigator.pop(context);
     setState(() {
       searchResults = internships.where((internship) {
         return selectedCategory == null ||
@@ -184,69 +166,15 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find a Job',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text('Find a Job'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          MouseRegion(
-            onEnter: (_) => setState(() {}),
-            onExit: (_) => setState(() {}),
-            child: IconButton(
-              icon: Tooltip(
-                message: 'Filter',
-                child: Icon(Icons.filter_list, color: Colors.black),
-              ),
-              onPressed: _showCategoryFilterModal,
-            ),
+          IconButton(
+            icon: Icon(Icons.filter_list, color: Colors.black),
+            onPressed: _showCategoryFilterModal,
           ),
         ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blueAccent,
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.lightbulb_outline),
-              title: Text('Tips'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TipsPage())),
-            ),
-           
-            ListTile(
-              leading: Icon(Icons.work_outline),
-              title: Text('My Applications'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Applications())),
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Your Profile'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => UserDetails())),
-            ),
-            ListTile(
-              leading: Icon(Icons.feedback),
-              title: Text('Give Feedback'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => FeedbackForm())),
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Log_In())),
-            ),
-          ],
-        ),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -265,15 +193,15 @@ class _SearchState extends State<Search> {
                               title: searchResults[index]['title'],
                               category: searchResults[index]['category'],
                               stipend: searchResults[index]['stipend'],
-                              isPromoted: index == 0,
+                              isPromoted: false,
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => VacancyDetails(
                                       vacancyId: searchResults[index]['id'],
-                                      category: searchResults[index]
-                                          ['category'],
+                                      category:
+                                          searchResults[index]['category'],
                                     ),
                                   ),
                                 );
@@ -346,8 +274,7 @@ class JobCard extends StatelessWidget {
                   style: TextStyle(fontSize: 14, color: Colors.teal)),
               SizedBox(height: 8),
               Text('Stipend: MWK ${stipend.toStringAsFixed(2)}',
-    style: TextStyle(fontSize: 14, color: Colors.black)),
-
+                  style: TextStyle(fontSize: 14, color: Colors.black)),
             ],
           ),
         ),
@@ -399,7 +326,7 @@ class VacancyDetails extends StatelessWidget {
                 Text('Duration: ${data['duration'] ?? 'No Duration'}',
                     style: TextStyle(fontSize: 18)),
                 Text('Stipend: MWK ${data['stipend'] ?? 'No Stipend'}',
-                style: TextStyle(fontSize: 18)),
+                    style: TextStyle(fontSize: 18)),
                 Text(
                     'Requirements: ${data['requirements'] ?? 'No Requirements'}',
                     style: TextStyle(fontSize: 18)),

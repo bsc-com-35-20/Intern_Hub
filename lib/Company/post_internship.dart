@@ -161,7 +161,7 @@ class _PostInternshipState extends State<PostInternship> {
                 'requirements': _requirements,
                 'location': _location,
                 'duration': _duration,
-                'salary': _stipend,
+                'stipend': _stipend,
                 'category': _category,
                 'postingDate': FieldValue.serverTimestamp(), // Add the posting date
                 'timestamp': FieldValue.serverTimestamp(), // Add a separate timestamp if needed

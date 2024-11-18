@@ -49,6 +49,8 @@ class ApplicationDetailPage extends StatelessWidget {
                 Text('Phone: ${applicationData['phone'] ?? 'N/A'}'),
                 SizedBox(height: 10),
                 Text('Cover Letter: ${applicationData['coverLetter'] ?? 'N/A'}'),
+                
+                Text('Referral: ${applicationData['referral']?? 'N/A'}'),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,

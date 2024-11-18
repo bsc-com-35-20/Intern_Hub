@@ -48,23 +48,23 @@ class _ApplicationPageState extends State<ApplicationPage> {
   Future<void> _submitApplication() async {
     if (_formKey.currentState!.validate()) {
       try {
-        final applicationData = {
-          'vacancyId': widget.vacancyId,
-          'vacancyTitle': widget.vacancyTitle,
-          'category': widget.category,
-          'name': nameController.text,
-          'email': emailController.text,
-          'phone': phoneController.text,
-          'coverLetter': coverLetterController.text,
-          'referral': {
-            'name': referralNameController.text,
-            'title': referralTitleController.text,
-            'organization': referralOrganizationController.text,
-            'contact': referralContactController.text,
-            'relation': referralRelationController.text,
-          },
-          'appliedAt': DateTime.now(),
-        };
+     final applicationData = {
+  'vacancyId': widget.vacancyId,
+  'vacancyTitle': widget.vacancyTitle,
+  'category': widget.category,
+  'name': nameController.text,
+  'email': emailController.text,
+  'phone': phoneController.text,
+  'coverLetter': coverLetterController.text,
+  'referral': {
+    'name': referralNameController.text,
+    'organization': referralOrganizationController.text,
+    'contact': referralContactController.text,
+  },
+  'status': 'Pending',  // Add the status field here
+  'appliedAt': DateTime.now(),
+};
+
 
         // Add to the general Applications collection
         await FirebaseFirestore.instance.collection('Applications').add(applicationData);
@@ -165,11 +165,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
                 controller: referralNameController,
                 decoration: InputDecoration(labelText: 'Referral Name'),
               ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: referralTitleController,
-                decoration: InputDecoration(labelText: 'Referral Title'),
-              ),
+
               SizedBox(height: 10),
               TextFormField(
                 controller: referralOrganizationController,
@@ -180,11 +176,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
                 controller: referralContactController,
                 decoration: InputDecoration(labelText: 'Referral Contact'),
               ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: referralRelationController,
-                decoration: InputDecoration(labelText: 'Relation to Referral'),
-              ),
+              
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitApplication,
