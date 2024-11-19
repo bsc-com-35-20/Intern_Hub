@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:internhub/Home/UserDetails.dart';
@@ -6,19 +7,14 @@ import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/Home/Help.dart';
 import 'package:internhub/Home/InternshipTips.dart';
 import 'package:internhub/Home/Search.dart';
+import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
 import 'package:internhub/Settings/SettingsPage.dart';
-import 'package:internhub/LogIn_ And_Register/Log_In.dart';
 import 'package:internhub/Home/NetworkingOpportunities.dart';
 import 'package:internhub/Home/InterviewPreparation.dart';
 import 'package:internhub/Home/FeedbackForm.dart';
-
-import 'package:internhub/Company/EmployersDashBoard.dart';
+import 'package:internhub/Company/employers_dashboard.dart';
 
 class HomePage extends StatefulWidget {
-  final String userRole; // Role to be passed in the constructor
-
-  HomePage({required this.userRole});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -26,13 +22,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   int _selectedIndex = 1;
+  bool _isCompany = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey,
+      backgroundColor: const Color.fromARGB(255, 207, 219, 225),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'InternHub',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
@@ -40,152 +37,257 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: Colors.white, size: 28),
+            icon: const Icon(Icons.search, color: Colors.white, size: 28),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Search()),
+                MaterialPageRoute(builder: (context) => FeedbackForm()),
               );
             },
           ),
           IconButton(
-            icon: Icon(Icons.logout, color: Colors.white, size: 28),
+            icon: const Icon(Icons.logout, color: Colors.white, size: 28),
             onPressed: _logout,
           ),
-          // IconButton(
-          //   icon: Icon(Icons.list, color: Colors.white, size: 28),
-          //   onPressed: () {
-          //     Navigator.push(context, 
-          //       MaterialPageRoute(builder: (context) => (Search()) )
-          //     );
-          //   }
-          // ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: const EdgeInsets.all(0),
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.green,
+              ),
+              child: Center(
+                child: Text(
+                  'Welcome to InternHub!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Your Profile'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserDetails()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.book),
+              title: const Text('Networking'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NetworkingOpportunities()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspace_premium),
+              title: const Text('For Companies'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EmployersDashBoard()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.video_label),
+              title: const Text('Give Feedback'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FeedbackForm()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 16,
-                childAspectRatio: 5.3 / 3,
-                children: _buildGridItems(),
+         // Scrollable cards section
+  Padding(
+    padding: const EdgeInsets.symmetric(vertical: 15.0),
+    child: SizedBox(
+      height: 100.0, 
+      width: double.infinity, 
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildScrollableCard(
+            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+            title: 'Vacancies',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Vacancies()),
+              );
+            },
+          ),
+          _buildScrollableCard(
+            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+            title: 'Applications',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Applications()),
+              );
+            },
+          ),
+          _buildScrollableCard(
+            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+            title: 'Internship Tips',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => InternshipTips()),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  ),
+
+
+            // The rest of the main content (Grid)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 5.3 / 3,
+                  children: _buildGridItems(),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.help, size: 28),
-            label: 'Help',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 28),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings, size: 28),
-            label: 'Settings',
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
 
-  List<Widget> _buildGridItems() {
-    List<Widget> gridItems = [];
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.help, size: 28),
+              label: 'Help',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home, size: 28),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings, size: 28),
+              label: 'Settings',
+            ),
+          ],
+        ),
+      );
+    }
 
-    // Check user role to build grid items
-    if (widget.userRole == 'Intern') {
-      Future.delayed(Duration.zero, () {
-        _navigateTo(Search());
+    List<Widget> _buildGridItems() {
+      List<Widget> gridItems = [];
+      return gridItems;
+    }
+
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
       });
-    } else if (widget.userRole == 'Company') {
-      _navigateTo(EmployersDashBoard());
+
+      if (index == 0) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Help()),
+        );
+      } else if (index == 2) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SettingsPage()),
+        );
+      }
     }
 
-    return gridItems;
-  }
-
-  void _navigateTo(Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    if (index == 0) {
-      Navigator.push(
+    void _logout() async {
+      await _auth.signOut();
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => Help()),
+        MaterialPageRoute(builder: (context) => Log_In()),
+        (Route<dynamic> route) => false,
       );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SettingsPage()),
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged out Successfully!')),
       );
     }
-  }
 
-  void _logout() async {
-    await _auth.signOut();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => Log_In()),
-      (Route<dynamic> route) => false,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Logged out Successfully!')),
-    );
-  }
-
-  Widget _buildSquareCard({
-    required IconData icon,
-    required String text,
-    required Color color,
+  Widget _buildScrollableCard({
+    required String imageUrl,
+    required String title,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
         color: Colors.white,
-        elevation: 2,
+        elevation: 5,
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 36,
-              color: Colors.black87,
-            ),
-            SizedBox(height: 10),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.error, color: Colors.red);
+                },
               ),
-            ),
-          ],
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
