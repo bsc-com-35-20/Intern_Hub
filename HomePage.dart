@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.green,
+                color: Color.fromARGB(255, 76, 175, 116),
               ),
               child: Center(
                 child: Text(
@@ -125,33 +125,33 @@ class _HomePageState extends State<HomePage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   _buildScrollableCard(
-                    imageUrl: 'assets/business-women-click-virtual-button-with-text-find-job-white-backgroundjob-online-concept_1306135-53952.jpg',
-                    title: 'Vacancies',
+                    imageUrl: 'assets/medium-shot-woman-working-as-lawyer.jpg',
+                    title: 'For companies',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Vacancies()),
+                        MaterialPageRoute(builder: (context) => EmployersDashBoard()),
                       );
                     },
                   ),
                   _buildScrollableCard(
-                    imageUrl: 'assets/front-view-working-covid-concept_23-2148616794.jpg',
-                    title: 'Applications',
+                    imageUrl: 'assets/businesswoman-checking-list-reception_73070-5408.jpg',
+                    title: 'Networking',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Applications()),
+                        MaterialPageRoute(builder: (context) => NetworkingOpportunities()),
                       );
                     },
                   ),
                   _buildScrollableCard(
                     
-                    imageUrl: 'assets/business-women-click-virtual-button-with-text-find-job-white-backgroundjob-online-concept_1306135-53946.jpg',
-                    title: 'Internship Tips',
+                    imageUrl: 'assets/portrait-professional-elegant-businessman.jpg',
+                    title: 'feedback',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => InternshipTips()),
+                        MaterialPageRoute(builder: (context) => FeedbackForm()),
                       );
                     },
                   ),
