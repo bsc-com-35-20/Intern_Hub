@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
   return GestureDetector(
     onTap: onTap,
     child: Container(
-      width: 150.0, 
+      width: 600.0, 
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
