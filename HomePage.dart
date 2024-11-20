@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text(
           'InternHub',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   _buildScrollableCard(
-                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
+                    imageUrl: 'assets/business-women-click-virtual-button-with-text-find-job-white-backgroundjob-online-concept_1306135-53952.jpg',
                     title: 'Vacancies',
                     onTap: () {
                       Navigator.push(
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   _buildScrollableCard(
-                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
+                    imageUrl: 'assets/front-view-working-covid-concept_23-2148616794.jpg',
                     title: 'Applications',
                     onTap: () {
                       Navigator.push(
@@ -145,7 +145,8 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   _buildScrollableCard(
-                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
+                    
+                    imageUrl: 'assets/business-women-click-virtual-button-with-text-find-job-white-backgroundjob-online-concept_1306135-53946.jpg',
                     title: 'Internship Tips',
                     onTap: () {
                       Navigator.push(
