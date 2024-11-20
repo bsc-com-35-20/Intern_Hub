@@ -22,7 +22,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   int _selectedIndex = 1;
-  bool _isCompany = false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,180 +115,191 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-         // Scrollable cards section
-  Padding(
-    padding: const EdgeInsets.symmetric(vertical: 15.0),
-    child: SizedBox(
-      height: 100.0, 
-      width: double.infinity, 
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _buildScrollableCard(
-            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
-            title: 'Vacancies',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Vacancies()),
-              );
-            },
+          // Scrollable cards section
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            child: SizedBox(
+              height: 100.0,
+              width: double.infinity,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildScrollableCard(
+                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    title: 'Vacancies',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Vacancies()),
+                      );
+                    },
+                  ),
+                  _buildScrollableCard(
+                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    title: 'Applications',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Applications()),
+                      );
+                    },
+                  ),
+                  _buildScrollableCard(
+                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    title: 'Internship Tips',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => InternshipTips()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
-          _buildScrollableCard(
-            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
-            title: 'Applications',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Applications()),
-              );
-            },
-          ),
-          _buildScrollableCard(
-            imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
-            title: 'Internship Tips',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => InternshipTips()),
-              );
-            },
+          // The rest of the main content (Grid)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 16,
+                childAspectRatio: 5.3 / 3,
+                children: _buildGridItems(),
+              ),
+            ),
           ),
         ],
       ),
-    ),
-  ),
-
-
-            // The rest of the main content (Grid)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 5.3 / 3,
-                  children: _buildGridItems(),
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.help, size: 28),
-              label: 'Help',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 28),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings, size: 28),
-              label: 'Settings',
-            ),
-          ],
-        ),
-      );
-    }
-
-    List<Widget> _buildGridItems() {
-      List<Widget> gridItems = [];
-      return gridItems;
-    }
-
-    void _onItemTapped(int index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-
-      if (index == 0) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Help()),
-        );
-      } else if (index == 2) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
-        );
-      }
-    }
-
-    void _logout() async {
-      await _auth.signOut();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Log_In()),
-        (Route<dynamic> route) => false,
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out Successfully!')),
-      );
-    }
-
-  Widget _buildScrollableCard({
-    required String imageUrl,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        color: Colors.white,
-        elevation: 5,
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  }
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error, color: Colors.red);
-                },
-              ),
-              Container(
-                color: Colors.black.withOpacity(0.5),
-                child: Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.help, size: 28),
+            label: 'Help',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 28),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings, size: 28),
+            label: 'Settings',
+          ),
+        ],
       ),
     );
   }
+
+  List<Widget> _buildGridItems() {
+    return [];
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Help()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SettingsPage()),
+      );
+    }
+  }
+
+  void _logout() async {
+    await _auth.signOut();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => Log_In()),
+      (Route<dynamic> route) => false,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Logged out Successfully!')),
+    );
+  }
+
+  Widget _buildScrollableCard({
+  required String imageUrl,
+  required String title,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 150.0, 
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 5.0,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Background Image
+            Positioned.fill(
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(Icons.error, color: Colors.red),
+                  );
+                },
+              ),
+            ),
+            // Title Overlay
+            Positioned(
+              bottom: 8.0,
+              left: 8.0,
+              right: 8.0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                color: Colors.black.withOpacity(0.5),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 }
