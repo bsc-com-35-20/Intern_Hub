@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   _buildScrollableCard(
-                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
                     title: 'Vacancies',
                     onTap: () {
                       Navigator.push(
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   _buildScrollableCard(
-                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
                     title: 'Applications',
                     onTap: () {
                       Navigator.push(
@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   _buildScrollableCard(
-                    imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...',
+                    imageUrl: 'assets/successful-freelancer-does-online-shopping-with-his-credit-card.jpg',
                     title: 'Internship Tips',
                     onTap: () {
                       Navigator.push(
