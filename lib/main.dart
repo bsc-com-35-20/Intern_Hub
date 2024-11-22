@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
+import 'package:internhub/Home/Search.dart';
 import 'package:internhub/Home/success.dart';
 import 'package:internhub/LogIn_ And_Register/Log_In.dart';
 import 'package:internhub/LogIn_%20And_Register/companyRegister.dart';
@@ -20,13 +21,17 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'InternHub',
       debugShowCheckedModeBanner: false,
+      // home: Search(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Color(0xFFEAF2FD),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       initialRoute: '/',
 

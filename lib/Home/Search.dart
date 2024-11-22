@@ -1,3 +1,4 @@
+import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,17 +11,18 @@ import 'package:internhub/Home/Tips.dart';
 import 'package:internhub/Home/UserDetails.dart';
 import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
+import 'package:internhub/pages/hahah.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: Search(),
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-      scaffoldBackgroundColor: Color(0xFFEAF2FD),
-      visualDensity: VisualDensity.adaptivePlatformDensity,
-    ),
-  ));
-}
+// void main() {
+//   runApp(MaterialApp(
+//     home: Hahah(),
+//     theme: ThemeData(
+//       primarySwatch: Colors.blue,
+//       scaffoldBackgroundColor: Color(0xFFEAF2FD),
+//       visualDensity: VisualDensity.adaptivePlatformDensity,
+//     ),
+//   ));
+// }
 
 class Search extends StatefulWidget {
   @override
@@ -109,12 +111,18 @@ class _SearchState extends State<Search> {
     }
   }
 
+  Timer? debounce;
+
   void onQueryChanged(String query) {
-    setState(() {
-      searchResults = internships
-          .where((item) =>
-              item['title'].toLowerCase().contains(query.toLowerCase()))
-          .toList();
+    print('Query Changed : $query');
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce = Timer(Duration(milliseconds: 300), () {
+      setState(() {
+        searchResults = internships
+            .where((item) =>
+                item['title'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
     });
   }
 
@@ -173,7 +181,7 @@ class _SearchState extends State<Search> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Find a Job'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blue,
         elevation: 0,
         actions: [
           MouseRegion(
@@ -189,54 +197,48 @@ class _SearchState extends State<Search> {
           ),
         ],
       ),
-     drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blueAccent,
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
+      drawer: Drawer(
+        child: ListView(children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
             ),
-          
-             ListTile(
-              leading: Icon(Icons.tips_and_updates),
-              title: Text('Tips'),
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TipsPage())),
+            child: Text(
+              'Menu',
+              style: TextStyle(color: Colors.white, fontSize: 24),
             ),
-           
-             ListTile(
-              leading: Icon(Icons.work_outline),
-              title: Text('My Applications'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Applications())),
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Your Profile'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => UserDetails())),
-            ),
-             ListTile(
-              leading: Icon(Icons.feedback),
-              title: Text('Give Feedback'),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => FeedbackForm())),
-            ),
-             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Log_In())),
-            ),
-          ]     
-           ),
+          ),
+          ListTile(
+            leading: Icon(Icons.tips_and_updates),
+            title: Text('Tips'),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (context) => TipsPage())),
+          ),
+          ListTile(
+            leading: Icon(Icons.work_outline),
+            title: Text('My Applications'),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => Applications())),
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Your Profile'),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => UserDetails())),
+          ),
+          ListTile(
+            leading: Icon(Icons.feedback),
+            title: Text('Give Feedback'),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => FeedbackForm())),
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Logout'),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Log_In())),
+          ),
+        ]),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -262,8 +264,8 @@ class _SearchState extends State<Search> {
                                   MaterialPageRoute(
                                     builder: (context) => VacancyDetails(
                                       vacancyId: searchResults[index]['id'],
-                                      category:
-                                          searchResults[index]['category'],
+                                      category: searchResults[index]
+                                          ['category'],
                                     ),
                                   ),
                                 );

@@ -18,7 +18,8 @@ class ApplicationPage extends StatefulWidget {
 }
 
 class _ApplicationPageState extends State<ApplicationPage> {
-  final _formKey = GlobalKey<FormState>();
+  //final _formKey = GlobalKey<FormState>();
+  final _applicationKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -59,7 +60,8 @@ class _ApplicationPageState extends State<ApplicationPage> {
   void _submitApplication() async {
     if (_isSubmitting) return; // Prevent double submission
 
-    if (_formKey.currentState!.validate()) {
+    if (_applicationKey.currentState!.validate()) {
+      //_formKey.currentState!.validate()
       setState(() {
         _isSubmitting = true;
       });
@@ -101,10 +103,10 @@ class _ApplicationPageState extends State<ApplicationPage> {
 
         // Navigate to success page only if the context is valid
         if (!mounted) return;
-        // Navigator.pushReplacement(
-        // context,
-        //MaterialPageRoute(builder: (context) => SuccessPage()),
-        //);lse);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SuccessPage()),
+        );
 
         Navigator.pushNamed(context, "/success");
       } catch (e) {
@@ -130,7 +132,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: _applicationKey, //_formKey,
           child: ListView(
             children: [
               TextFormField(
@@ -140,66 +142,81 @@ class _ApplicationPageState extends State<ApplicationPage> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
                   }
-                  return null;
                 },
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email Address'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
+                onTap: () {
+                  FocusScope.of(context).requestFocus();
                 },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: coverLetterController,
-                decoration: InputDecoration(labelText: 'Cover Letter'),
-                maxLines: 5,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a cover letter';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              Text('Referral Information',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: referralNameController,
-                decoration: InputDecoration(labelText: 'Referral Name'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: referralOrganizationController,
-                decoration: InputDecoration(labelText: 'Referral Organization'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: referralContactController,
-                decoration: InputDecoration(labelText: 'Referral Contact'),
-              ),
+                textInputAction: TextInputAction.next,
+              )
+
+              // TextFormField(
+              //   controller: nameController,
+              //   decoration: InputDecoration(labelText: 'Full Name'),
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter your name';
+              //     }
+              //     return null;
+              //   },
+              // ),
+              // SizedBox(height: 10),
+              // TextFormField(
+              //   controller: emailController,
+              //   decoration: const InputDecoration(labelText: 'Email Address'),
+              //   keyboardType: TextInputType.emailAddress,
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter your email';
+              //     }
+              //     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              //       return 'Please enter a valid email';
+              //     }
+              //     return null;
+              //   },
+              // ),
+              // const SizedBox(height: 10),
+              // TextFormField(
+              //   controller: phoneController,
+              //   decoration: const InputDecoration(labelText: 'Phone Number'),
+              //   keyboardType: TextInputType.phone,
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter your phone number';
+              //     }
+              //     return null;
+              //   },
+              // ),
+              // SizedBox(height: 10),
+              // TextFormField(
+              //   controller: coverLetterController,
+              //   decoration: InputDecoration(labelText: 'Cover Letter'),
+              //   maxLines: 5,
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter a cover letter';
+              //     }
+              //     return null;
+              //   },
+              // ),
+              // SizedBox(height: 20),
+              // Text('Referral Information',
+              //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              // SizedBox(height: 10),
+              // TextFormField(
+              //   controller: referralNameController,
+              //   decoration: InputDecoration(labelText: 'Referral Name'),
+              // ),
+              // SizedBox(height: 10),
+              // TextFormField(
+              //   controller: referralOrganizationController,
+              //   decoration: InputDecoration(labelText: 'Referral Organization'),
+              // ),
+              // SizedBox(height: 10),
+              // TextFormField(
+              //   controller: referralContactController,
+              //   decoration: InputDecoration(labelText: 'Referral Contact'),
+              // ),
+              ,
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitApplication,
