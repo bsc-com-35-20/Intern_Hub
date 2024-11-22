@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internhub/Home/Applicationpage.dart';
+import 'package:internhub/Home/Applications.dart';
+import 'package:internhub/Home/FeedbackForm.dart';
+import 'package:internhub/Home/Tips.dart';
+import 'package:internhub/Home/UserDetails.dart';
+import 'package:internhub/Home/Vacancies.dart';
+import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -170,11 +176,67 @@ class _SearchState extends State<Search> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list, color: Colors.black),
-            onPressed: _showCategoryFilterModal,
+          MouseRegion(
+            onEnter: (_) => setState(() {}),
+            onExit: (_) => setState(() {}),
+            child: IconButton(
+              icon: Tooltip(
+                message: 'Filter',
+                child: Icon(Icons.filter_list, color: Colors.black),
+              ),
+              onPressed: _showCategoryFilterModal,
+            ),
           ),
         ],
+      ),
+     drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+          
+             ListTile(
+              leading: Icon(Icons.tips_and_updates),
+              title: Text('Tips'),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TipsPage())),
+            ),
+           
+             ListTile(
+              leading: Icon(Icons.work_outline),
+              title: Text('My Applications'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Applications())),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Your Profile'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => UserDetails())),
+            ),
+             ListTile(
+              leading: Icon(Icons.feedback),
+              title: Text('Give Feedback'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => FeedbackForm())),
+            ),
+             ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Log_In())),
+            ),
+          ]     
+           ),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())

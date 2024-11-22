@@ -8,7 +8,10 @@ class ApplicationPage extends StatefulWidget {
   final String vacancyTitle;
   final String category;
 
-  ApplicationPage({required this.vacancyId, required this.vacancyTitle, required this.category});
+  ApplicationPage(
+      {required this.vacancyId,
+      required this.vacancyTitle,
+      required this.category});
 
   @override
   _ApplicationPageState createState() => _ApplicationPageState();
@@ -22,9 +25,13 @@ class _ApplicationPageState extends State<ApplicationPage> {
   final TextEditingController coverLetterController = TextEditingController();
   final TextEditingController referralNameController = TextEditingController();
   final TextEditingController referralTitleController = TextEditingController();
-  final TextEditingController referralOrganizationController = TextEditingController();
-  final TextEditingController referralContactController = TextEditingController();
-  final TextEditingController referralRelationController = TextEditingController();
+  final TextEditingController referralOrganizationController =
+      TextEditingController();
+  final TextEditingController referralContactController =
+      TextEditingController();
+  final TextEditingController referralRelationController =
+      TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -38,36 +45,47 @@ class _ApplicationPageState extends State<ApplicationPage> {
     if (user != null) {
       nameController.text = user.displayName ?? '';
       emailController.text = user.email ?? '';
-      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
       if (userDoc.exists) {
         phoneController.text = userDoc.data()?['phone'] ?? '';
       }
     }
   }
 
-  Future<void> _submitApplication() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-     final applicationData = {
-  'vacancyId': widget.vacancyId,
-  'vacancyTitle': widget.vacancyTitle,
-  'category': widget.category,
-  'name': nameController.text,
-  'email': emailController.text,
-  'phone': phoneController.text,
-  'coverLetter': coverLetterController.text,
-  'referral': {
-    'name': referralNameController.text,
-    'organization': referralOrganizationController.text,
-    'contact': referralContactController.text,
-  },
-  'status': 'Pending',  // Add the status field here
-  'appliedAt': DateTime.now(),
-};
+  //Future<void>
+  void _submitApplication() async {
+    if (_isSubmitting) return; // Prevent double submission
 
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isSubmitting = true;
+      });
+
+      try {
+        final applicationData = {
+          'vacancyId': widget.vacancyId,
+          'vacancyTitle': widget.vacancyTitle,
+          'category': widget.category,
+          'name': nameController.text,
+          'email': emailController.text,
+          'phone': phoneController.text,
+          'coverLetter': coverLetterController.text,
+          'referral': {
+            'name': referralNameController.text,
+            'organization': referralOrganizationController.text,
+            'contact': referralContactController.text,
+          },
+          'status': 'Pending', // Add the status field here
+          'appliedAt': DateTime.now(),
+        };
 
         // Add to the general Applications collection
-        await FirebaseFirestore.instance.collection('Applications').add(applicationData);
+        await FirebaseFirestore.instance
+            .collection('Applications')
+            .add(applicationData);
 
         // Add to specific internship application list
         await FirebaseFirestore.instance
@@ -83,13 +101,19 @@ class _ApplicationPageState extends State<ApplicationPage> {
 
         // Navigate to success page only if the context is valid
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SuccessPage()),
-        );
+        // Navigator.pushReplacement(
+        // context,
+        //MaterialPageRoute(builder: (context) => SuccessPage()),
+        //);lse);
+
+        Navigator.pushNamed(context, "/success");
       } catch (e) {
+        setState(() {
+          _isSubmitting = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit application. Please try again.')),
+          const SnackBar(
+              content: Text('Failed to submit application. Please try again.')),
         );
         print(e);
       }
@@ -122,7 +146,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
               SizedBox(height: 10),
               TextFormField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email Address'),
+                decoration: const InputDecoration(labelText: 'Email Address'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -134,10 +158,10 @@ class _ApplicationPageState extends State<ApplicationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: phoneController,
-                decoration: InputDecoration(labelText: 'Phone Number'),
+                decoration: const InputDecoration(labelText: 'Phone Number'),
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -159,13 +183,13 @@ class _ApplicationPageState extends State<ApplicationPage> {
                 },
               ),
               SizedBox(height: 20),
-              Text('Referral Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('Referral Information',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
               TextFormField(
                 controller: referralNameController,
                 decoration: InputDecoration(labelText: 'Referral Name'),
               ),
-
               SizedBox(height: 10),
               TextFormField(
                 controller: referralOrganizationController,
@@ -176,7 +200,6 @@ class _ApplicationPageState extends State<ApplicationPage> {
                 controller: referralContactController,
                 decoration: InputDecoration(labelText: 'Referral Contact'),
               ),
-              
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitApplication,
@@ -187,7 +210,8 @@ class _ApplicationPageState extends State<ApplicationPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text('Submit Application', style: TextStyle(fontSize: 18)),
+                child:
+                    Text('Submit Application', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "intern_hub.com"
+    namespace = "intern_hub.com" //com.intern_hub
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "25.1.8937393"
 
@@ -18,8 +18,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+   kotlinOptions {
+       jvmTarget = JavaVersion.VERSION_11
     }
 
     defaultConfig {
@@ -34,6 +34,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
     }
 
     buildTypes {
