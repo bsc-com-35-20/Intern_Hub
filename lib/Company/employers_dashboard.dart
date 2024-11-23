@@ -4,6 +4,7 @@ import 'package:internhub/Company/accepted_interns.dart';
 import 'package:internhub/Company/internship_alerts.dart';
 import 'package:internhub/Company/manage_internships.dart';
 import 'package:internhub/Company/post_internship.dart';
+import 'package:internhub/Home/HomePage.dart';
 
 
 class EmployersDashBoard extends StatelessWidget {
@@ -138,7 +139,7 @@ class EmployersDashBoard extends StatelessWidget {
             subtitle: 'Set up notifications to stay updated on applications and key internship milestones.',
             color: Colors.teal,
            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => InternshipAlerts()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
             },
           ),
 

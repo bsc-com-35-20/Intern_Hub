@@ -37,9 +37,7 @@ class MyApp extends StatelessWidget {
         '/LogIn': (context) => Log_In(), // Define LogIn route
         '/companyRegister': (context) => RegisterCompany(),
         '/internRegister': (context) => Register(),
-        '/Home': (context) => HomePage(
-            userRole: ModalRoute.of(context)!.settings.arguments
-                as String), // Pass userRole
+        '/Home': (context) => HomePage(), // Pass userRole
         '/UpdateProfile': (context) => UpdateProfile(),
         '/Vacancies': (context) => Vacancies(),
         "/Success": (context) => SuccessPage(),

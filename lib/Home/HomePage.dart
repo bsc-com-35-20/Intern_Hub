@@ -16,9 +16,8 @@ import 'package:internhub/Home/FeedbackForm.dart';
 import 'package:internhub/Company/employers_dashboard.dart';
 
 class HomePage extends StatefulWidget {
-  final String userRole; // Role to be passed in the constructor
 
-  HomePage({required this.userRole});
+  HomePage();
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -45,7 +44,6 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FeedbackForm()),
                 MaterialPageRoute(builder: (context) => FeedbackForm()),
               );
             },
@@ -228,7 +226,6 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => Log_In()),
-      (Route<dynamic> route) => false,
       (Route<dynamic> route) => false,
     );
 

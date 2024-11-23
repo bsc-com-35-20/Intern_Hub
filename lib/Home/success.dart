@@ -41,7 +41,7 @@ class SuccessPage extends StatelessWidget {
   Navigator.of(context).popUntil((route) => route.isFirst);
   Navigator.pushReplacement(
     context,
-    MaterialPageRoute(builder: (context) => HomePage(userRole: 'Intern')),
+    MaterialPageRoute(builder: (context) => HomePage()),
   );
 },
                 style: ElevatedButton.styleFrom(
