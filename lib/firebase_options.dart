@@ -67,6 +67,7 @@ class DefaultFirebaseOptions {
     projectId: 'internhub-25577',
     databaseURL: 'https://internhub-25577-default-rtdb.firebaseio.com',
     storageBucket: 'internhub-25577.appspot.com',
+    iosClientId: '238945027859-88cl76rsfdtto0c1pooohab3l87hc6bv.apps.googleusercontent.com',
     iosBundleId: 'com.example.internhub',
   );
 
@@ -77,6 +78,7 @@ class DefaultFirebaseOptions {
     projectId: 'internhub-25577',
     databaseURL: 'https://internhub-25577-default-rtdb.firebaseio.com',
     storageBucket: 'internhub-25577.appspot.com',
+    iosClientId: '238945027859-88cl76rsfdtto0c1pooohab3l87hc6bv.apps.googleusercontent.com',
     iosBundleId: 'com.example.internhub',
   );
 

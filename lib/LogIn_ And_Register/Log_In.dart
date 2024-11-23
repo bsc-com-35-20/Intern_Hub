@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internhub/Home/HomePage.dart'; // Import the HomePage
+import 'package:internhub/Home/HomePage.dart';
+import 'package:internhub/LogIn_%20And_Register/companyRegister.dart';
+import 'package:internhub/LogIn_%20And_Register/internRegister.dart'; // Import the HomePage
+
+bool isMobileScreen(BuildContext context) {
+  return MediaQuery.of(context).size.width < 800; // Example breakpoint
+}
+
+bool isDesktopScreen(BuildContext context) {
+  return MediaQuery.of(context).size.width >= 800;
+}
 
 class Log_In extends StatefulWidget {
   @override
@@ -11,6 +22,7 @@ class Log_In extends StatefulWidget {
 class _Log_InState extends State<Log_In> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _companyNameController = TextEditingController(); // Controller for Company Name
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true; // To toggle password visibility
   String? _errorMessage; // To hold error messages
@@ -19,6 +31,20 @@ class _Log_InState extends State<Log_In> {
     setState(() {
       _errorMessage = null; // Reset the error message
     });
+
+    if (isDesktopScreen(context)) {
+      if (_companyNameController.text.isEmpty) {
+        setState(() {
+          _errorMessage = "Company Name is required for login.";
+        });
+        return;
+      }
+    } else if (!isMobileScreen(context)) {
+      setState(() {
+        _errorMessage = "Interns can only log in on smaller screens (mobile).";
+      });
+      return;
+    }
 
     if (_formKey.currentState?.validate() ?? false) {
       try {
@@ -31,28 +57,23 @@ class _Log_InState extends State<Log_In> {
         // Navigate to HomePage after successful login
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              userRole: isDesktopScreen(context) ? 'Company' : 'Intern',
+            ), // Pass user role
+          ),
         );
       } on FirebaseAuthException catch (e) {
-        // Check the error code and set appropriate error message
-        if (e.code == 'user-not-found') {
-          setState(() {
-            _errorMessage = "Incorrect Password"; // Treat unregistered email as incorrect password
-          });
-        } else if (e.code == 'wrong-password') {
-          setState(() {
-            _errorMessage = "Incorrect Password"; // Wrong password
-          });
-        } else {
-          setState(() {
-            _errorMessage = "Email or Password Incorrect"; // Generic message for other errors
-          });
-        }
+        // Set appropriate error message
+        setState(() {
+          _errorMessage = e.code == 'user-not-found' || e.code == 'wrong-password'
+              ? "Incorrect Email or Password"
+              : "Error: ${e.message}";
+        });
       }
     }
   }
 
-  // Method to handle password reset
   Future<void> _resetPassword(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
@@ -70,7 +91,6 @@ class _Log_InState extends State<Log_In> {
     }
   }
 
-  // Method to show forgot password dialog
   void _showForgotPasswordDialog() {
     String email = "";
     showDialog(
@@ -106,6 +126,8 @@ class _Log_InState extends State<Log_In> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = isDesktopScreen(context);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -132,7 +154,7 @@ class _Log_InState extends State<Log_In> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Log In',
+                          isDesktop ? 'Company Login' : 'Intern Login',
                           style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
                         ),
                         SizedBox(height: 20),
@@ -144,48 +166,59 @@ class _Log_InState extends State<Log_In> {
                               style: TextStyle(color: Colors.red, fontSize: 16),
                             ),
                           ),
-                        // Email Field
+                        if (isDesktop)
+                          TextFormField(
+                            controller: _companyNameController,
+                            decoration: InputDecoration(
+                              labelText: 'Company Name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Company Name';
+                              }
+                              return null;
+                            },
+                          ),
+                        SizedBox(height: 20),
                         TextFormField(
                           controller: _emailController,
                           decoration: InputDecoration(
                             labelText: 'Email',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             filled: true,
-                            fillColor: Colors.grey[200], // Light background
+                            fillColor: Colors.grey[200],
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your Email';
                             }
-                            if (!RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                                .hasMatch(value)) {
-                              return 'Please enter a valid Email';
-                            }
                             return null;
                           },
                         ),
                         SizedBox(height: 20),
-                        // Password Field
                         TextFormField(
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: 'Password',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), // Rounded corners
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             filled: true,
-                            fillColor: Colors.grey[200], // Light background
+                            fillColor: Colors.grey[200],
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                color: Colors.blue,
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscurePassword = !_obscurePassword; // Toggle password visibility
+                                  _obscurePassword = !_obscurePassword;
                                 });
                               },
                             ),
@@ -198,39 +231,52 @@ class _Log_InState extends State<Log_In> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 30),
-                        // Log In Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _logIn,
-                            child: Text('Log In'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10), // Rounded button
-                              ),
-                              backgroundColor: Colors.blueAccent, // Button color
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _logIn,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        // Forgot Password
-                        TextButton(
-                          onPressed: _showForgotPasswordDialog,
-                          child: Text('Forgot your Password?', style: TextStyle(color: Colors.blue)),
-                        ),
-                        SizedBox(height: 10),
-                        // Switch to Sign Up
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacementNamed(context, '/Register');
-                          },
                           child: Text(
-                            'Don\'t have an Account? Sign Up',
-                            style: TextStyle(color: Colors.blue),
+                            'Log In',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
+                        SizedBox(height: 10),
+                        TextButton(
+                          onPressed: _showForgotPasswordDialog,
+                          child: Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
+                        ),
+                            // Sign Up Button
+                       SizedBox(height: 10),
+TextButton(
+  onPressed: () {
+    // Navigate to appropriate registration screen based on screen size
+    if (isDesktopScreen(context)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => RegisterCompany()),
+      ); // Company registration
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Register()),
+      ); // Intern registration
+    }
+  },
+  child: Text(
+    'Don\'t have an account? Sign Up',
+    style: TextStyle(color: Colors.blueAccent),
+  ),
+),
+
                       ],
                     ),
                   ),

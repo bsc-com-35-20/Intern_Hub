@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  file_picker: ^5.0.0
+  firebase_storage: ^12.3.1
   flutter_facebook_auth: ^7.1.1
   modal_progress_hud_nsn: ^0.5.1
   google_fonts: ^6.2.1
@@ -19,6 +21,7 @@ dependencies:
   firebase_core: ^3.4.1
   firebase_auth_web: ^5.8.13
   cloud_firestore: ^5.4.1
+  firebase_messaging: ^15.1.2
   google_sign_in: ^6.2.1
   validators: ^3.0.0
   fluttertoast: ^8.2.6
@@ -26,12 +29,14 @@ dependencies:
   local_auth: ^2.1.7
   shared_preferences: ^2.3.2
   firebase_database: ^11.1.2
-  flutter_local_notifications: ^17.2.2
   url_launcher: ^6.0.20
+  searchfield: ^1.1.6
+  http: ^1.2.2
 
-  # Dependencies for forms, navigation, and UI components
-  flutter_localizations: # For localization if needed
-    sdk: flutter
+  # New dependencies for profile functionality
+  image_picker: ^0.8.7+3
+  intl: ^0.17.0
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
