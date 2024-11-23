@@ -1,24 +1,22 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase core
+import 'package:internhub/Home/success.dart';
 import 'package:internhub/LogIn_ And_Register/Log_In.dart';
-import 'package:internhub/LogIn_ And_Register/Register.dart';
-import '../firebase_options.dart';
+import 'package:internhub/LogIn_%20And_Register/companyRegister.dart';
+import 'package:internhub/LogIn_%20And_Register/internRegister.dart';
+import 'package:internhub/Settings/UpdateProfile.dart';
+import 'firebase_options.dart';
 import 'package:internhub/Home/HomePage.dart';
 import 'package:internhub/Home/Vacancies.dart';
-import 'package:internhub/Vacancy/VacancyDetails1.dart';
-import 'package:internhub/Vacancy/VacancyDetails2.dart';
-import 'package:internhub/Vacancy/VacancyDetails3.dart';
-
+import 'package:internhub/SplashScreen.dart';
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Make sure this is set up
+    options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -32,24 +30,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/LogIn', // Set initial route
+      initialRoute: '/',
 
       routes: {
-
-
+        '/': (context) => SplashScreen(),
         '/LogIn': (context) => Log_In(), // Define LogIn route
-        '/Register': (context) => Register(), // Define Register route
-        '/Home': (context) =>HomePage(),
-
-        '/VacancyDetails1': (context) => VacancyDetails1(),
-        '/VacancyDetails2': (context) => VacancyDetails2(),
-        '/VacancyDetails3': (context) => VacancyDetails3(),
-
-
+        '/companyRegister': (context) => RegisterCompany(),
+        '/internRegister': (context) => Register(),
+        '/Home': (context) => HomePage(
+            userRole: ModalRoute.of(context)!.settings.arguments
+                as String), // Pass userRole
+        '/UpdateProfile': (context) => UpdateProfile(),
+        '/Vacancies': (context) => Vacancies(),
+        "/Success": (context) => SuccessPage(),
       },
       // or use onGenerateRoute if you want more dynamic route handling
     );
   }
 }
-
-

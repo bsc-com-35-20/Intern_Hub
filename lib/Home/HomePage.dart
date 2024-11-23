@@ -1,10 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:internhub/Settings/UserDetails.dart';
+import 'package:internhub/Home/UserDetails.dart';
 import 'package:internhub/Home/Applications.dart';
 import 'package:internhub/Home/Vacancies.dart';
 import 'package:internhub/Home/Help.dart';
+import 'package:internhub/Home/InternshipTips.dart';
 import 'package:internhub/Home/InternshipTips.dart';
 import 'package:internhub/Home/Search.dart';
 import 'package:internhub/LogIn_%20And_Register/Log_In.dart';
@@ -15,6 +16,10 @@ import 'package:internhub/Home/FeedbackForm.dart';
 import 'package:internhub/Company/employers_dashboard.dart';
 
 class HomePage extends StatefulWidget {
+  final String userRole; // Role to be passed in the constructor
+
+  HomePage({required this.userRole});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -40,6 +45,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
+                MaterialPageRoute(builder: (context) => FeedbackForm()),
                 MaterialPageRoute(builder: (context) => FeedbackForm()),
               );
             },
@@ -222,6 +228,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => Log_In()),
+      (Route<dynamic> route) => false,
       (Route<dynamic> route) => false,
     );
 

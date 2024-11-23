@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ApplicationDetailPage extends StatelessWidget {
   final String applicationId;
 
-  const ApplicationDetailPage({super.key, required this.applicationId});
+  ApplicationDetailPage({required this.applicationId});
 
   Future<Map<String, dynamic>?> _fetchApplicationDetails() async {
     try {
@@ -20,19 +20,19 @@ class ApplicationDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Application Details'),
+        title: Text('Application Details'),
         backgroundColor: Colors.teal,
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _fetchApplicationDetails(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           final applicationData = snapshot.data;
           if (applicationData == null) {
-            return const Center(child: Text('Application not found.'));
+            return Center(child: Text('Application not found.'));
           }
 
           return Padding(
@@ -40,18 +40,18 @@ class ApplicationDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Vacancy Title: ${applicationData['vacancyTitle'] ?? 'N/A'}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
+                Text('Vacancy Title: ${applicationData['vacancyTitle'] ?? 'N/A'}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                SizedBox(height: 10),
                 Text('Category: ${applicationData['category'] ?? 'N/A'}'),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Text('Name: ${applicationData['name'] ?? 'N/A'}'),
                 Text('Email: ${applicationData['email'] ?? 'N/A'}'),
                 Text('Phone: ${applicationData['phone'] ?? 'N/A'}'),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Text('Cover Letter: ${applicationData['coverLetter'] ?? 'N/A'}'),
                 
                 Text('Referral: ${applicationData['referral']?? 'N/A'}'),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -60,15 +60,15 @@ class ApplicationDetailPage extends StatelessWidget {
                         // Accept application logic
                         // _updateApplicationStatus(applicationId, 'Accepted');
                       },
-                      child: const Text('Accept', style: TextStyle(color: Colors.green)),
+                      child: Text('Accept', style: TextStyle(color: Colors.green)),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     TextButton(
                       onPressed: () {
                         // Reject application logic
                         // _updateApplicationStatus(applicationId, 'Rejected');
                       },
-                      child: const Text('Reject', style: TextStyle(color: Colors.red)),
+                      child: Text('Reject', style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
