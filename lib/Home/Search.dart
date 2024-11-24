@@ -54,7 +54,7 @@ class _SearchState extends State<Search> {
   }
 
   Future<void> _fetchInternships() async {
-    setState(() {
+   setState(() {
       isLoading = true;
     });
 
@@ -185,8 +185,7 @@ class _SearchState extends State<Search> {
         elevation: 0,
         actions: [
           MouseRegion(
-            onEnter: (_) => setState(() {}),
-            onExit: (_) => setState(() {}),
+          
             child: IconButton(
               icon: Tooltip(
                 message: 'Filter',

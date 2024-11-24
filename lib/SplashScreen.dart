@@ -33,7 +33,7 @@ class CircularLogo extends StatelessWidget {
       height: 150,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Color(0xFF6C63FF), width: 8),
+        border: Border.all(color: Color.fromARGB(255, 187, 222, 251), width: 8),
       ),
       child: Center(
         child: Text(
@@ -76,7 +76,7 @@ class CallToActionButton extends StatelessWidget {
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF6C63FF),
+        backgroundColor: Color(0xFFBBDEFB),
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

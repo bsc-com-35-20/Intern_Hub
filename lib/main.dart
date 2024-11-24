@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashScreen(),
         '/LogIn': (context) => Log_In(), // Define LogIn route
-        '/companyRegister': (context) => RegisterCompany(),
-        '/internRegister': (context) => Register(),
+        /*'/companyRegister': (context) => RegisterCompany(),
+        '/internRegister': (context) => RegisterIntern(),*/
         '/Home': (context) => HomePage(
             userRole: ModalRoute.of(context)!.settings.arguments
                 as String), // Pass userRole

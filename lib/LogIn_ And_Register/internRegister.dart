@@ -1,4 +1,4 @@
-import 'dart:io';
+/*import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class Register extends StatefulWidget {
+class RegisterIntern extends StatefulWidget {
   @override
-  _RegisterState createState() => _RegisterState();
+  _RegisterInternState createState() => _RegisterInternState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterInternState extends State<RegisterIntern> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
@@ -297,3 +297,4 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+*/

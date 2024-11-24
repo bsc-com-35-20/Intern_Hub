@@ -1,284 +1,233 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internhub/Home/HomePage.dart';
-import 'package:internhub/LogIn_%20And_Register/companyRegister.dart';
-import 'package:internhub/LogIn_%20And_Register/internRegister.dart'; // Import the HomePage
-
-bool isMobileScreen(BuildContext context) {
-  return MediaQuery.of(context).size.width < 800; // Example breakpoint
-}
-
-bool isDesktopScreen(BuildContext context) {
-  return MediaQuery.of(context).size.width >= 800;
-}
+import 'package:internhub/Company/employers_dashboard.dart';
+import 'package:internhub/Home/Search.dart';
 
 class Log_In extends StatefulWidget {
   @override
-  _Log_InState createState() => _Log_InState();
+  _LogInState createState() => _LogInState();
 }
 
-class _Log_InState extends State<Log_In> {
+class _LogInState extends State<Log_In> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _companyNameController = TextEditingController(); // Controller for Company Name
   final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true; // To toggle password visibility
-  String? _errorMessage; // To hold error messages
+  bool _obscurePassword = true;
+  bool _isLoading = false;
+  String _role = 'Intern'; // Default role
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _determineRole();
+    });
+  }
+
+  void _determineRole() {
+    setState(() {
+      _role = MediaQuery.of(context).size.width < 800 ? 'Intern' : 'Company';
+    });
+  }
 
   Future<void> _logIn() async {
-    setState(() {
-      _errorMessage = null; // Reset the error message
-    });
-
-    if (isDesktopScreen(context)) {
-      if (_companyNameController.text.isEmpty) {
-        setState(() {
-          _errorMessage = "Company Name is required for login.";
-        });
-        return;
-      }
-    } else if (!isMobileScreen(context)) {
-      setState(() {
-        _errorMessage = "Interns can only log in on smaller screens (mobile).";
-      });
-      return;
-    }
+    setState(() => _isLoading = true);
 
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Log in with email and password
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        // Navigate to HomePage after successful login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              userRole: isDesktopScreen(context) ? 'Company' : 'Intern',
-            ), // Pass user role
-          ),
-        );
+        final email = _emailController.text.trim();
+
+        // Check Firestore collections to determine where to navigate
+        final internDetails = await FirebaseFirestore.instance
+            .collection('Intern_Personal_Details')
+            .doc(email)
+            .get();
+
+        if (internDetails.exists && MediaQuery.of(context).size.width < 800) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Search()),
+          );
+          return;
+        }
+
+        final companyDetails = await FirebaseFirestore.instance
+            .collection('Company_Details')
+            .doc(email)
+            .get();
+
+        if (companyDetails.exists && MediaQuery.of(context).size.width >= 800) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => EmployersDashBoard()),
+          );
+          return;
+        }
+
+        // If user is not found in either collection
+        _showSnackBar("User details not found. Please contact support.");
       } on FirebaseAuthException catch (e) {
-        // Set appropriate error message
-        setState(() {
-          _errorMessage = e.code == 'user-not-found' || e.code == 'wrong-password'
-              ? "Incorrect Email or Password"
-              : "Error: ${e.message}";
-        });
+        _showSnackBar(e.code == 'user-not-found' || e.code == 'wrong-password'
+            ? "Incorrect Email or Password"
+            : "An error occurred. Please try again.");
       }
     }
+    setState(() => _isLoading = false);
   }
 
-  Future<void> _resetPassword(String email) async {
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      Fluttertoast.showToast(
-        msg: "Password reset email sent!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-    } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Error sending password reset email.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-    }
-  }
-
-  void _showForgotPasswordDialog() {
-    String email = "";
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Forgot Password"),
-          content: TextField(
-            decoration: InputDecoration(hintText: "Enter your email"),
-            onChanged: (value) {
-              email = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _resetPassword(email);
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text("Send"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text("Cancel"),
-            ),
-          ],
-        );
-      },
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(message),
+          backgroundColor: const Color.fromARGB(255, 187, 222, 252)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDesktopScreen(context);
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlue], // Gradient background
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Color(0xFF8E9EAB), Color(0xFFeef2f3)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Card(
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isDesktop ? 'Company Login' : 'Intern Login',
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                width: 350,
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.4)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Role Display
+                      Text(
+                        "Role: $_role",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 20),
-                        if (_errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Text(
-                              _errorMessage!,
-                              style: TextStyle(color: Colors.red, fontSize: 16),
-                            ),
+                      ),
+                      SizedBox(height: 20),
+                      // Avatar
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor:
+                            const Color.fromARGB(255, 187, 222, 252)
+                                .withOpacity(0.5),
+                        child:
+                            Icon(Icons.person, size: 50, color: Colors.white),
+                      ),
+                      SizedBox(height: 20),
+                      // Email Field
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: 'Email ID',
+                        icon: Icons.email_outlined,
+                      ),
+                      SizedBox(height: 16),
+                      // Password Field
+                      _buildTextField(
+                        controller: _passwordController,
+                        hintText: 'Password',
+                        icon: Icons.lock_outline,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white,
                           ),
-                        if (isDesktop)
-                          TextFormField(
-                            controller: _companyNameController,
-                            decoration: InputDecoration(
-                              labelText: 'Company Name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your Company Name';
-                              }
-                              return null;
-                            },
-                          ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Email';
-                            }
-                            return null;
+                          onPressed: () {
+                            setState(
+                                () => _obscurePassword = !_obscurePassword);
                           },
                         ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: true,
+                                onChanged: (value) {},
+                                activeColor: Colors.white,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
+                              Text('Remember me',
+                                  style: TextStyle(color: Colors.white)),
+                            ],
                           ),
-                          obscureText: _obscurePassword,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your Password';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _logIn,
+                          TextButton(
+                            onPressed: () {},
+                            child: Text('Forgot Password?',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      // Login Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _logIn,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                            padding: EdgeInsets.all(16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            backgroundColor:
+                                const Color.fromARGB(255, 187, 222, 252),
                           ),
-                          child: Text(
-                            'Log In',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : Text('LOGIN', style: TextStyle(fontSize: 18)),
                         ),
-                        SizedBox(height: 10),
-                        TextButton(
-                          onPressed: _showForgotPasswordDialog,
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.blueAccent),
-                          ),
+                      ),
+                      SizedBox(height: 10),
+                      // Sign-up Link
+                      GestureDetector(
+                        onTap: () => Navigator.pushReplacementNamed(
+                            context, '/Register'),
+                        child: Text(
+                          "Don't have an account? Sign Up",
+                          style: TextStyle(color: Colors.white),
                         ),
-                            // Sign Up Button
-                       SizedBox(height: 10),
-TextButton(
-  onPressed: () {
-    // Navigate to appropriate registration screen based on screen size
-    if (isDesktopScreen(context)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => RegisterCompany()),
-      ); // Company registration
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Register()),
-      ); // Intern registration
-    }
-  },
-  child: Text(
-    'Don\'t have an account? Sign Up',
-    style: TextStyle(color: Colors.blueAccent),
-  ),
-),
-
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -286,6 +235,38 @@ TextButton(
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.white70),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.3),
+        prefixIcon: Icon(icon, color: Colors.white),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $hintText';
+        }
+        return null;
+      },
     );
   }
 }
